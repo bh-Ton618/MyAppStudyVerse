@@ -15,8 +15,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.AssignmentTurnedIn
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.NoteAlt
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,35 +36,34 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 
 @Composable
-fun DashboardScreen(modifier: Modifier = Modifier) {
+fun DashboardScreen(navController: NavController,
+                    modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxSize().statusBarsPadding().padding(horizontal = 24.dp).padding(top = 32.dp),
         verticalArrangement = Arrangement.Top
     )
 
     {
-        GreetingsSection()
-        Spacer(
-            modifier = Modifier.height(16.dp))
+        GreetingSection()
+        Spacer(modifier = Modifier.height(16.dp))
 
-        MotivationalCard()
-        Spacer(
-            modifier = Modifier.height(16.dp))
+        MotivationSection()
+        Spacer(modifier = Modifier.height(16.dp))
 
-        TodayOverview()
+        TodayOverviewSection()
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-            }
-        ) {
-            Text("Los geht's")
-        }
+        UpComingSection()
+        Spacer(modifier = Modifier.height(16.dp))
+
+        BottomNavigationBar(navController)
     }
 }
 
 @Composable
-fun GreetingsSection() {
+fun GreetingSection() {
     Column() {
         Row {
             Column(modifier = Modifier.weight(1f)) {
@@ -81,8 +90,8 @@ fun GreetingsSection() {
 
 
 @Composable
-fun MotivationalCard(modifier: Modifier = Modifier) {
-    Card(modifier = modifier.fillMaxWidth().height(180.dp).padding(16.dp)) {
+fun MotivationSection(modifier: Modifier = Modifier) {
+    Card(modifier = modifier.fillMaxWidth().height(180.dp)) {
 
         Row(modifier = Modifier.fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically
@@ -120,7 +129,7 @@ fun RocketIcon() {
 }
 
 @Composable
-fun TodayOverview() {
+fun TodayOverviewSection() {
     Column {
         Text(text = "Today's Overview")
         Spacer(modifier = Modifier.height(16.dp))
@@ -138,18 +147,142 @@ fun TodayOverview() {
 @Composable
 fun OverViewCard(modifier: Modifier = Modifier,icon: String, number: String, title: String){
 
-    Card(modifier = modifier.height(140.dp)) {
+    Card(modifier = modifier.height(120.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(Color.Gray),
+            Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(Color.Gray),
                 contentAlignment = Alignment.Center
                 ) {
-                Text(text = icon, fontSize = 24.sp)
+                Text(text = icon, fontSize = 20.sp)
             }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(text = number)
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(text = title)
 
             }
         }
     }
+
+@Composable
+fun UpComingSection() {
+    Column() {
+        Text("Upcoming")
+        Spacer(modifier = Modifier.height(16.dp))
+        UpcomingCard(
+            title = "Math Homework",
+            subtitle = "Due Tomorrow 2PM",
+            icon = "\uD83D\uDCD8"
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        UpcomingCard(
+            title = "Physics Class",
+            subtitle = "Tomorrow 4PM",
+            icon = "\uD83E\uDDEA"
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        UpcomingCard(
+            title = "Business Communication Exam",
+            subtitle = "Tomorrow 8AM ",
+            icon = "\uD83D\uDCDD"
+        )
+
+    }
+}
+
+@Composable
+fun UpcomingCard(title: String, subtitle: String, icon: String) {
+        Card() {
+            Column(modifier = Modifier.padding(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).background(Color.Gray),
+                        contentAlignment = Alignment.Center
+                    ) {
+                    Text(text = icon,
+                        fontSize = 24.sp)
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = title,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = subtitle,
+                            fontSize = 14.sp,
+                            color = Color.Gray
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = "Open"
+                    )
+                }
+            }
+        }
+    }
+
+@Composable
+fun BottomNavigationBar(navController: NavController) {
+    NavigationBar {
+    NavigationBarItem(
+        selected = true,
+        onClick = {
+            navController.navigate("dashbaord")
+        },
+        icon = {
+            Icon(Icons.Outlined.Home,
+                contentDescription = "Home")
+        }
+    )
+        NavigationBarItem(
+            selected = false,
+            onClick = {
+                navController.navigate("tasks")
+            },
+            icon = {
+                Icon(Icons.Outlined.AssignmentTurnedIn,
+                    contentDescription = "Tasks")
+            }
+        )
+        NavigationBarItem(
+            selected = false,
+            onClick = {
+                navController.navigate("timetable")
+            },
+            icon = {
+                Icon(Icons.Outlined.CalendarMonth,
+                    contentDescription = "Timetable")
+            }
+        )
+        NavigationBarItem(
+            selected = false,
+            onClick = {
+                navController.navigate("notes")
+            },
+            icon = {
+                Icon(Icons.Outlined.NoteAlt,
+                    contentDescription = "Notes")
+            }
+        )
+        NavigationBarItem(
+            selected = false,
+            onClick = {
+                navController.navigate("space")
+            },
+            icon = {
+                Icon(Icons.Outlined.AutoAwesome,
+                    contentDescription = "Space")
+            }
+        )
+    }
+}
+
+

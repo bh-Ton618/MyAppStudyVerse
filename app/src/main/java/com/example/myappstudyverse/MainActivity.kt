@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.example.myappstudyverse.ui.screens.DashboardScreen
+import com.example.myappstudyverse.ui.navigation.StudyVerseNavigation
 import com.example.myappstudyverse.ui.theme.MyAppStudyVerseTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MyAppStudyVerseTheme {
-                DashboardScreen()
+                StudyVerseNavigation()
                 }
             }
         }
