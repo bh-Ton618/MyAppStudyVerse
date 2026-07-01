@@ -83,13 +83,14 @@ fun GreetingSection() {
                     text = "Saturday, June 27"
                 )
             }
-            Box(modifier = Modifier
-                .size(40.dp)
-                .clickable {
-                    //TODO: Navigate to profile
-                }
-                .clip(CircleShape)
-                .background(Color.Gray),
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clickable {
+                        //TODO: Navigate to profile
+                    }
+                    .clip(CircleShape)
+                    .background(Color.Gray),
                 contentAlignment = Alignment.Center) {
                 Text("A")
             }
@@ -101,9 +102,11 @@ fun GreetingSection() {
 
 @Composable
 fun MotivationSection(modifier: Modifier = Modifier) {
-    Card(modifier = modifier
-        .fillMaxWidth()
-        .height(170.dp)) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(170.dp)
+    ) {
 
         Row(
             modifier = Modifier.fillMaxSize(),
