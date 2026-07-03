@@ -10,9 +10,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,9 +20,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,6 +52,7 @@ data class Task(
 
 @Composable
 fun TasksScreen() {
+    //Stores the currently selected task filter: All, to Do, Done
     var selectedFilterChip by remember { mutableStateOf("All") }
     val taskList = listOf(
         Task("TestTask", "Due: 02.08.2026", "HIGH", "blablabla :)", true),
@@ -73,6 +77,7 @@ fun TasksScreen() {
     )
 
 
+//Filters the task list based on the selected filter.
     val filteredTaskList = when (selectedFilterChip) {
         "All" -> taskList
         "to Do" -> taskList.filter { task -> !task.isDone }
@@ -80,57 +85,81 @@ fun TasksScreen() {
         else -> taskList
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .padding(horizontal = 24.dp)
-    ) {
-        Text(
-            text = "My Tasks",
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(12.dp))
 
-        Row {
-            TaskFilterChip(
-                text = "All",
-                isSelected = selectedFilterChip == "All",
-                onClick = {
-                    selectedFilterChip = "All"
-                }
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            TaskFilterChip(
-                text = "to Do",
-                isSelected = selectedFilterChip == "to Do",
-                onClick = {
-                    selectedFilterChip = "to Do"
-                }
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            TaskFilterChip(
-                text = "Done",
-                isSelected = selectedFilterChip == "Done",
-                onClick = {
-                    selectedFilterChip = "Done"
-                }
-            )
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {},
+                modifier = Modifier.offset(y = 24.dp),
+                shape = CircleShape,
+                containerColor = Color(0xFFA78BFA)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add task",
+                    tint = Color.White
+                )
+            }
         }
-        Spacer(modifier = Modifier.height(16.dp))
+    ) { innerPadding ->
 
-        // Scrollbare Liste aller Task
-        // Nur sichtbare Elemente werden gerendert (Lazy Loading)
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(filteredTaskList) { task ->
-                TaskCard(task = task)
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    start = 24.dp,
+                    end = 24.dp,
+                    top = 24.dp,
+                    bottom = innerPadding.calculateBottomPadding()
+                )
+        ) {
+            Text(
+                text = "My Tasks",
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row {
+                TaskFilterChip(
+                    text = "All",
+                    isSelected = selectedFilterChip == "All",
+                    onClick = {
+                        selectedFilterChip = "All"
+                    }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                TaskFilterChip(
+                    text = "to Do",
+                    isSelected = selectedFilterChip == "to Do",
+                    onClick = {
+                        selectedFilterChip = "to Do"
+                    }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                TaskFilterChip(
+                    text = "Done",
+                    isSelected = selectedFilterChip == "Done",
+                    onClick = {
+                        selectedFilterChip = "Done"
+                    }
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Scrollable list of all task
+            // Nur sichtbare Elemente werden gerendert (Lazy Loading)
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(filteredTaskList) { task ->
+                    TaskCard(task = task)
+                }
             }
         }
     }
 }
 
-
+//Reusable filter chip for selecting a task category.
 @Composable
 fun TaskFilterChip(
     text: String,
@@ -142,7 +171,7 @@ fun TaskFilterChip(
             .size(width = 115.dp, height = 40.dp)
             .clip(RoundedCornerShape(50.dp))
             .background(
-                if (isSelected) Color.Gray
+                if (isSelected) Color(0xFFA78BFA)
                 else Color.LightGray
             )
             .clickable {
@@ -159,6 +188,7 @@ fun TaskFilterChip(
     }
 }
 
+//Displays a single card item.
 @Composable
 fun TaskCard(task: Task) {
 

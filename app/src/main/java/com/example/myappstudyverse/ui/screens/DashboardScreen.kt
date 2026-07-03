@@ -10,25 +10,26 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.AssignmentTurnedIn
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.NoteAlt
 import androidx.compose.material3.Card
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -40,36 +41,61 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
+
+//Main dashboard screen which provides quick access to application features.
 @Composable
 fun DashboardScreen(
     navController: NavController,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .statusBarsPadding()
-            .padding(horizontal = 24.dp),
-        verticalArrangement = Arrangement.Top
-    )
 
-    {
-        GreetingSection()
-        Spacer(modifier = Modifier.height(16.dp))
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {},
+                modifier = Modifier.offset(y = 28.dp),
+                shape = CircleShape,
+                containerColor = Color(0xFFA78BFA)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add task",
+                    tint = Color.White
+                )
+            }
+        }
+    ) { innerPadding ->
 
-        MotivationSection()
-        Spacer(modifier = Modifier.height(16.dp))
+        Column(
+            modifier = modifier
+                .padding(
+                    start = 24.dp,
+                    end = 24.dp,
+                    top = 24.dp,
+                    bottom = innerPadding.calculateBottomPadding()
+                )
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Top
+        )
 
-        TodayOverviewSection()
-        Spacer(modifier = Modifier.height(16.dp))
+        {
+            GreetingSection()
+            Spacer(modifier = Modifier.height(16.dp))
 
-        UpComingSection()
-        Spacer(modifier = Modifier.height(16.dp))
+            MotivationSection()
+            Spacer(modifier = Modifier.height(24.dp))
 
+            TodayOverviewSection()
+            Spacer(modifier = Modifier.height(16.dp))
+
+            UpComingSection()
+            Spacer(modifier = Modifier.height(16.dp))
+
+        }
     }
 }
 
+// Displays the welcome message for the user. 
 @Composable
 fun GreetingSection() {
     Column() {
@@ -122,7 +148,8 @@ fun MotivationSection(modifier: Modifier = Modifier) {
                 Text(
                     text = "Daily Motivation",
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFA78BFA)
                 )
 
 
@@ -132,6 +159,8 @@ fun MotivationSection(modifier: Modifier = Modifier) {
                     text = "Shoot for the moon.\nEven if you miss,\nyou'll land among the stars.",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
+                    //color = Color.White
+
                 )
 
             }
@@ -156,7 +185,7 @@ fun RocketIcon() {
 fun TodayOverviewSection() {
     Column {
         Text(text = "Today's Overview")
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Row {
             OverViewCard(
                 modifier = Modifier.weight(1f),
@@ -210,7 +239,7 @@ fun OverViewCard(modifier: Modifier = Modifier, icon: String, number: String, ti
 fun UpComingSection() {
     Column() {
         Text("Upcoming")
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         UpcomingCard(
             title = "Math Homework",
             subtitle = "Due Tomorrow 2PM",
