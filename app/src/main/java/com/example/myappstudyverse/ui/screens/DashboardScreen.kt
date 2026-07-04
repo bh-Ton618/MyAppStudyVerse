@@ -19,16 +19,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.AssignmentTurnedIn
-import androidx.compose.material.icons.outlined.AutoAwesome
-import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.NoteAlt
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -303,72 +296,6 @@ fun UpcomingCard(title: String, subtitle: String, icon: String) {
                 )
             }
         }
-    }
-}
-
-@Composable
-fun BottomNavigationBar(navController: NavController) {
-    NavigationBar {
-        NavigationBarItem(
-            selected = true,
-            onClick = {
-                navController.navigate("dashbaord")
-            },
-            icon = {
-                Icon(
-                    Icons.Outlined.Home,
-                    contentDescription = "Home"
-                )
-            }
-        )
-        NavigationBarItem(
-            selected = false,
-            onClick = {
-                navController.navigate("tasks")
-            },
-            icon = {
-                Icon(
-                    Icons.Outlined.AssignmentTurnedIn,
-                    contentDescription = "Tasks"
-                )
-            }
-        )
-        NavigationBarItem(
-            selected = false,
-            onClick = {
-                navController.navigate("timetable")
-            },
-            icon = {
-                Icon(
-                    Icons.Outlined.CalendarMonth,
-                    contentDescription = "Timetable"
-                )
-            }
-        )
-        NavigationBarItem(
-            selected = false,
-            onClick = {
-                navController.navigate("notes")
-            },
-            icon = {
-                Icon(
-                    Icons.Outlined.NoteAlt,
-                    contentDescription = "Notes"
-                )
-            }
-        )
-        NavigationBarItem(
-            selected = false,
-            onClick = {
-                navController.navigate("space")
-            },
-            icon = {
-                Icon(
-                    Icons.Outlined.AutoAwesome,
-                    contentDescription = "Space"
-                )
-            }
-        )
     }
 }
 

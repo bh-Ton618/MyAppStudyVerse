@@ -22,13 +22,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,39 +45,86 @@ import androidx.compose.ui.unit.sp
 
 
 data class Task(
+    val id: Int,
     val title: String,
     val dueDate: String,
-    val priority: String,
     val description: String,
+    val priority: Priority,
     var isDone: Boolean
 )
+
+enum class Priority {
+    LOW,
+    MEDIUM,
+    HIGH
+}
 
 
 @Composable
 fun TasksScreen() {
     //Stores the currently selected task filter: All, to Do, Done
     var selectedFilterChip by remember { mutableStateOf("All") }
-    val taskList = listOf(
-        Task("TestTask", "Due: 02.08.2026", "HIGH", "blablabla :)", true),
-        Task("TestTask", "Due: 29.07.2026", "HIGH", "tralalla", false),
-        Task("TestTask2", "Due: 01.08.2026", "MEDIUM", "shalala:P", false),
-        Task("TestTask3", "Due: 15.07.2026", "LOW", "CioaCiao ;D", false),
-        Task("TestTask4", "Due: 21.07.2026", "HIGH", "gettingBoring:P", false),
-        Task("TestTask5", "Due: 22.07.2026", "LOW", "lastOne ~", false),
-        Task("TestTask6", "Due: 22.07.2026", "LOW", "lastOne ~", true),
-        Task("TestTask7", "Due: 22.07.2026", "LOW", "lastOne ~", false),
-        Task("TestTask8", "Due: 22.07.2026", "LOW", "lastOne ~", true),
-        Task("TestTask9", "Due: 22.07.2026", "LOW", "lastOne ~", false),
-        Task("TestTask10", "Due: 22.07.2026", "LOW", "lastOne ~", false),
-        Task("TestTask11", "Due: 22.07.2026", "LOW", "lastOne ~", false),
-        Task("TestTask12", "Due: 22.07.2026", "LOW", "lastOne ~", false),
-        Task("TestTask13", "Due: 22.07.2026", "LOW", "lastOne ~", true),
-        Task("TestTask14", "Due: 22.07.2026", "LOW", "lastOne ~", false),
-        Task("TestTask15", "Due: 22.07.2026", "LOW", "lastOne ~", true),
-        Task("TestTask16", "Due: 22.07.2026", "LOW", "lastOne ~", false),
-        Task("TestTask17", "Due: 22.07.2026", "LOW", "lastOne ~", false),
-        Task("TestTask18", "Due: 22.07.2026", "LOW", "lastOne ~", false)
-    )
+
+    var isSearchOpen by remember { mutableStateOf(false) }
+
+    var searchText by remember { mutableStateOf("") }
+
+    val taskList = remember {
+        mutableStateListOf(
+            Task(id = 1, "TestTask1", "Due: 02.08.2026", "kasfaf", priority = Priority.HIGH, true),
+            Task(
+                id = 2,
+                "TestTask2",
+                "Due: 29.07.2026",
+                "fsfwefwe",
+                priority = Priority.LOW,
+                false
+            ),
+            Task(
+                id = 3,
+                "TestTask3",
+                "Due: 01.08.2026",
+                "wefwefwef",
+                priority = Priority.MEDIUM,
+                false
+            ),
+            Task(
+                id = 4,
+                "TestTask4",
+                "Due: 15.07.2026",
+                "wefwefwef",
+                priority = Priority.HIGH,
+                false
+            ),
+            Task(id = 5, "TestTask5", "Due: 21.07.2026", "wfwef", priority = Priority.LOW, false),
+            Task(
+                id = 6,
+                "TestTask6",
+                "Due: 22.07.2026",
+                "Lwefwefw",
+                priority = Priority.LOW,
+                false
+            ),
+            Task(id = 7, "TestTask7", "Due: 22.07.2026", "wefwef", priority = Priority.HIGH, true),
+            Task(
+                id = 8,
+                "TestTask8",
+                "Due: 22.07.2026",
+                "wefwef",
+                priority = Priority.MEDIUM,
+                false
+            ),
+            Task(id = 9, "TestTask9", "Due: 22.07.2026", "efwef", priority = Priority.MEDIUM, true),
+            Task(
+                id = 10,
+                "TestTask10",
+                "Due: 22.07.2026",
+                "efwef",
+                priority = Priority.MEDIUM,
+                false
+            )
+        )
+    }
 
 
 //Filters the task list based on the selected filter.
@@ -114,11 +164,36 @@ fun TasksScreen() {
                     bottom = innerPadding.calculateBottomPadding()
                 )
         ) {
-            Text(
-                text = "My Tasks",
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Text(
+                    text = "My Tasks",
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                IconButton(
+                    onClick = {
+                        isSearchOpen = !isSearchOpen
+                    }
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .offset(y = 2.dp),
+                        imageVector = Icons.Outlined.Search,
+                        contentDescription = "Search"
+                    )
+                }
+            }
+
+            if (isSearchOpen) {
+
+            }
+
             Spacer(modifier = Modifier.height(12.dp))
 
             Row {
@@ -151,8 +226,24 @@ fun TasksScreen() {
             // Scrollable list of all task
             // Nur sichtbare Elemente werden gerendert (Lazy Loading)
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(filteredTaskList) { task ->
-                    TaskCard(task = task)
+                items(
+                    items = filteredTaskList,
+                    key = { task -> task.id }
+                ) { task ->
+                    TaskCard(
+                        task = task,
+                        onTaskChecked = {
+                            val taskIndex = taskList.indexOfFirst {
+                                it.id == task.id
+                            }
+                            if (taskIndex != -1) {
+                                taskList[taskIndex] = task.copy(
+                                    isDone = !task.isDone
+                                )
+                            }
+
+                        }
+                    )
                 }
             }
         }
@@ -190,8 +281,10 @@ fun TaskFilterChip(
 
 //Displays a single card item.
 @Composable
-fun TaskCard(task: Task) {
-
+fun TaskCard(
+    task: Task,
+    onTaskChecked: () -> Unit
+) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -208,7 +301,7 @@ fun TaskCard(task: Task) {
                         else Color.Gray
                     )
                     .clickable {
-                        task.isDone = !task.isDone
+                        onTaskChecked()
                     }
             ) {
                 if (task.isDone) {

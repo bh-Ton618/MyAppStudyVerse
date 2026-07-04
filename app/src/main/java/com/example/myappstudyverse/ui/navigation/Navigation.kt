@@ -8,7 +8,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.myappstudyverse.ui.screens.BottomNavigationBar
 import com.example.myappstudyverse.ui.screens.DashboardScreen
 import com.example.myappstudyverse.ui.screens.NotesScreen
 import com.example.myappstudyverse.ui.screens.SpaceScreen
