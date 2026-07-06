@@ -5,8 +5,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -48,8 +50,8 @@ data class Task(
     val id: Int,
     val title: String,
     val dueDate: String,
-    val description: String,
-    val priority: Priority,
+    val description: String = " ",
+    val priority: Priority? = null,
     var isDone: Boolean
 )
 
@@ -285,47 +287,70 @@ fun TaskCard(
     task: Task,
     onTaskChecked: () -> Unit
 ) {
+    val priorityColor = when (task.priority) {
+        Priority.HIGH -> Color(0xFF7C3AED)
+        Priority.MEDIUM -> Color(0xFFA78BFA)
+        Priority.LOW -> Color(0xFFD8B4FE)
+        null -> Color.Transparent
+
+    }
     Card(modifier = Modifier.fillMaxWidth()) {
+
         Row(
             modifier = Modifier
+                .padding(start = 6.dp)
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .height(IntrinsicSize.Min)
         ) {
+
             Box(
                 modifier = Modifier
-                    .size(30.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (task.isDone) Color(0xFFA78BFA)
-                        else Color.Gray
-                    )
-                    .clickable {
-                        onTaskChecked()
-                    }
-            ) {
-                if (task.isDone) {
-                    Icon(
-                        modifier = Modifier.align(Alignment.Center),
-                        imageVector = Icons.Default.Check,
-                        tint = Color.White,
-                        contentDescription = if (task.isDone) "Task done"
-                        else "Task open"
-                    )
-
-                }
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = task.title, fontWeight = FontWeight.Bold)
-                Text(text = task.dueDate, fontSize = 14.sp)
-            }
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = "Open"
+                    .fillMaxHeight()
+                    .width(4.dp)
+                    .background(priorityColor)
             )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (task.isDone) Color(0xFFA78BFA)
+                            else Color.Gray
+                        )
+                        .clickable {
+                            onTaskChecked()
+                        }
+                ) {
+                    if (task.isDone) {
+                        Icon(
+                            modifier = Modifier.align(Alignment.Center),
+                            imageVector = Icons.Default.Check,
+                            tint = Color.White,
+                            contentDescription = if (task.isDone) "Task done"
+                            else "Task open"
+                        )
+
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = task.title, fontWeight = FontWeight.Bold)
+                    Text(text = task.dueDate, fontSize = 14.sp)
+                }
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = "Open"
+                )
+            }
         }
     }
 }
