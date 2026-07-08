@@ -1,5 +1,6 @@
 package com.example.myappstudyverse.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,18 +11,25 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -46,6 +55,12 @@ data class Note(
     var isPinned: Boolean
 )
 
+enum class NoteSortOption {
+    NEWEST,
+    OLDEST,
+    TITLE_ASC,
+    TITLE_DESC
+}
 
 @Composable
 fun NotesHeaderArtWork() {
@@ -57,63 +72,95 @@ fun NotesScreen() {
 
     var isSearchOpen by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
+    var isFilterMenuExpanded by remember { mutableStateOf(false) }
+    var selectedSortOption by remember { mutableStateOf(NoteSortOption.NEWEST) }
+    var isPinnedSectionExpanded by remember { mutableStateOf(true) }
 
 
     val notesList = remember {
         mutableStateListOf(
-            Note(id = 1, "Note 1", "Created: 02.08.2026", "kasf", isPinned = true),
+            Note(id = 1, "About Biology", "02.08.2026", "Learned today that ...", isPinned = true),
             Note(
                 id = 2,
-                "Note 2",
-                "Created: 29.07.2026",
-                "fsfwefwe",
+                "Singularity",
+                "29.07.2026",
+                "Einstein: What does it actually mean?",
                 isPinned = false
             ),
             Note(
                 id = 3,
-                "Note 3",
-                "Created: 01.08.2026",
-                "wefwefwef",
+                "MultiVerse",
+                "01.08.2026",
+                "Watched a documantary about that and ...",
                 isPinned = false
             ),
 
             Note(
                 id = 4,
-                "Note 4",
-                "Created: 15.07.2026",
-                "wefwefwef",
-                isPinned = false
+                "Legal things about rentals",
+                "15.07.2026",
+                "landlord told me...",
+                isPinned = true
 
             ),
-            Note(id = 5, "Note 5", "Created: 21.07.2026", "wfwef", isPinned = false),
+            Note(id = 5, "Food and Cafes", "21.07.2026", "Berlin... location", isPinned = false),
             Note(
                 id = 6,
-                "Note 6",
-                "Created: 22.07.2026",
-                "Lwefwefw",
+                "travel destinations",
+                "22.07.2026",
+                "Singapur, Hongkong, Italy",
                 isPinned = false
             ),
 
-            Note(id = 7, "Note 7", "Created: 22.07.2026", "wefwef", isPinned = false),
+            Note(
+                id = 7,
+                "Travel plans",
+                "22.07.2026",
+                "Start:We first need to...",
+                isPinned = false
+            ),
             Note(
                 id = 8,
-                "Note 8",
-                "Created: 22.07.2026",
-                "wefwef",
+                "secrets ",
+                "22.07.2026",
+                "...",
                 isPinned = false
             ),
 
-            Note(id = 9, "Note 9", "Created: 22.07.2026", "efwef", isPinned = false),
+            Note(id = 9, "Inform Mom about", "22.07.2026", "about the house and", isPinned = false),
             Note(
                 id = 10,
-                "Note 10",
-                "Created: 22.07.2026",
-                "efwef",
+                "Random",
+                "22.07.2026",
+                "random...",
                 isPinned = false
 
             )
         )
     }
+    // Step 1: Sort notes ->
+    //TODO: Replace ID sorting with createdTimeStamp after introducing persistent storage
+    val sortedNotesList = when (selectedSortOption) {
+        NoteSortOption.NEWEST ->
+            notesList.sortedWith(compareByDescending<Note> { note -> note.isPinned }.thenByDescending { note -> note.id })
+
+        NoteSortOption.OLDEST ->
+            notesList.sortedWith(compareByDescending<Note> { note -> note.isPinned }.thenBy { note -> note.id })
+
+        NoteSortOption.TITLE_ASC ->
+            notesList.sortedWith(compareByDescending<Note> { note -> note.isPinned }.thenBy { note -> note.title })
+
+        NoteSortOption.TITLE_DESC ->
+            notesList.sortedWith(compareByDescending<Note> { note -> note.isPinned }.thenByDescending { note -> note.title })
+    }
+
+// Step 2: Filter notes based on the search query ->
+    val filteredNotesList = sortedNotesList.filter { note ->
+        note.title.contains(searchText, ignoreCase = true) ||
+                note.description.contains(searchText, ignoreCase = true)
+    }
+
+
 
 
     Scaffold(
@@ -171,13 +218,14 @@ fun NotesScreen() {
                             imageVector = Icons.Outlined.Search,
                             contentDescription = "Search"
                         )
-                        //another filter Icon needed here ! <---
+
                     }
                     IconButton(
                         onClick = {
-                            //TODO: // to sort
+                            isFilterMenuExpanded = !isFilterMenuExpanded
                         }
-                    ) {
+                    )
+                    {
                         Icon(
                             modifier = Modifier
                                 .size(30.dp)
@@ -186,20 +234,118 @@ fun NotesScreen() {
                             contentDescription = "Sort"
                         )
                     }
+                    DropdownMenu(
+                        expanded = isFilterMenuExpanded,
+                        onDismissRequest = {
+                            isFilterMenuExpanded = false
+                        }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Newest") },
+                            onClick = {
+                                selectedSortOption = NoteSortOption.NEWEST
+                                isFilterMenuExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Oldest") },
+                            onClick = {
+                                selectedSortOption = NoteSortOption.OLDEST
+                                isFilterMenuExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Title (A-Z)") },
+                            onClick = {
+                                selectedSortOption = NoteSortOption.TITLE_ASC
+                                isFilterMenuExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Title (Z-A)") },
+                            onClick = {
+                                selectedSortOption = NoteSortOption.TITLE_DESC
+                                isFilterMenuExpanded = false
+                            }
+                        )
+
+                    }
                 }
             }
 
             if (isSearchOpen) {
-                // TODO: //
+                OutlinedTextField(
+                    value = searchText,
+                    onValueChange = { newText -> searchText = newText },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    shape = RoundedCornerShape(18.dp),
+                    placeholder = { Text("Search notes...") },
+                    singleLine = true
+                )
             }
+
             Spacer(modifier = Modifier.height(16.dp))
+
+
+            val pinnedNotes = filteredNotesList.filter { note -> note.isPinned }
+            val unpinnedNotes = filteredNotesList.filter { note -> !note.isPinned }
+
+            if (pinnedNotes.isNotEmpty()) {
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .clickable { isPinnedSectionExpanded = !isPinnedSectionExpanded },
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                )
+                {
+                    Text(text = "Pinned", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+                    Icon(
+                        imageVector =
+                            if (isPinnedSectionExpanded)
+                                Icons.Filled.KeyboardArrowDown
+                            else
+                                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = "Toogle pinned notes"
+                    )
+
+                }
+            }
 
 
             // Scrollable list of all notes
             // Only visible elements will be rendered (Lazy Loading)
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+
+                if (isPinnedSectionExpanded) {
+                    items(
+                        items = pinnedNotes,
+                        key = { note -> note.id }
+                    ) { note ->
+                        NoteCard(
+                            note = note,
+                            onNoteClick = {
+                                //TODO: //
+                            }
+                        )
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+                }
+                item {
+                    Text(
+                        text = "Notes",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
                 items(
-                    items = notesList,   // maybe we need this in case later we filter by the filter icon ? example by create date, title and more
+                    items = unpinnedNotes,
                     key = { note -> note.id }
                 ) { note ->
                     NoteCard(
@@ -209,6 +355,8 @@ fun NotesScreen() {
                         }
                     )
                 }
+
+
             }
         }
     }
@@ -228,6 +376,19 @@ fun NoteCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+
+            if (note.isPinned) {
+                Icon(
+                    imageVector = Icons.Default.PushPin,
+                    contentDescription = "Pinned Note",
+                    tint = Color(0xFFA78BFA),
+                    modifier = Modifier
+                        .size(18.dp)
+                        .rotate(20f)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = note.title, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Text(text = note.createdDate, fontSize = 14.sp)
@@ -239,9 +400,4 @@ fun NoteCard(
         }
     }
 }
-
-
-
-
-
 
