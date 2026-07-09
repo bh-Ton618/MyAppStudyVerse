@@ -85,7 +85,7 @@ fun NotesScreen() {
                 "Singularity",
                 "29.07.2026",
                 "Einstein: What does it actually mean?",
-                isPinned = false
+                isPinned = true
             ),
             Note(
                 id = 3,
@@ -100,7 +100,7 @@ fun NotesScreen() {
                 "Legal things about rentals",
                 "15.07.2026",
                 "landlord told me...",
-                isPinned = true
+                isPinned = false
 
             ),
             Note(id = 5, "Food and Cafes", "21.07.2026", "Berlin... location", isPinned = false),
@@ -117,7 +117,7 @@ fun NotesScreen() {
                 "Travel plans",
                 "22.07.2026",
                 "Start:We first need to...",
-                isPinned = false
+                isPinned = true
             ),
             Note(
                 id = 8,

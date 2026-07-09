@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.myappstudyverse.ui.components.AppFilterChip
 
 
 data class Task(
@@ -333,7 +334,7 @@ fun TasksScreen() {
             Spacer(modifier = Modifier.height(12.dp))
 
             Row {
-                TaskFilterChip(
+                AppFilterChip(
                     text = "All",
                     isSelected = selectedFilterChip == "All",
                     onClick = {
@@ -341,7 +342,7 @@ fun TasksScreen() {
                     }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                TaskFilterChip(
+                AppFilterChip(
                     text = "to Do",
                     isSelected = selectedFilterChip == "to Do",
                     onClick = {
@@ -349,7 +350,7 @@ fun TasksScreen() {
                     }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                TaskFilterChip(
+                AppFilterChip(
                     text = "Done",
                     isSelected = selectedFilterChip == "Done",
                     onClick = {
@@ -383,35 +384,6 @@ fun TasksScreen() {
                 }
             }
         }
-    }
-}
-
-//Reusable filter chip for selecting a task category.
-@Composable
-fun TaskFilterChip(
-    text: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .size(width = 115.dp, height = 40.dp)
-            .clip(RoundedCornerShape(50.dp))
-            .background(
-                if (isSelected) Color(0xFFA78BFA)
-                else Color.LightGray
-            )
-            .clickable {
-                onClick()
-            },
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium
-        )
-
     }
 }
 
