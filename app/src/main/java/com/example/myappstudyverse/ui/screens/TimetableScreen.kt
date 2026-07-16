@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,10 +21,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -35,8 +40,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.times
 import com.example.myappstudyverse.ui.components.AppFilterChip
 
 
@@ -68,6 +75,30 @@ fun TimetableHeaderArtWork() {
     //TODO: Insert artwork here later
 }
 
+private fun mapDayToColumn(day: DayOfWeek): Int {
+    return when (day) {
+        DayOfWeek.MONDAY -> 0
+        DayOfWeek.TUESDAY -> 1
+        DayOfWeek.WEDNESDAY -> 2
+        DayOfWeek.THURSDAY -> 3
+        DayOfWeek.FRIDAY -> 4
+        //OR shorter:
+        //private fun dayToColumn(day: DayOfWeek): Int {
+        //return day.ordinal }
+    }
+}
+
+private fun mapTimeToRow(time: String, hours: List<String>): Int {
+    return hours.indexOf(time)
+}
+
+
+private fun formatLectureTime(start: String, end: String): String {
+    val formattedStart = start.substringBefore(" ").trimStart('0')
+    val formattedEnd = end.substringBefore(" ").trimStart('0')
+    return "$formattedStart-$formattedEnd"
+}
+
 
 @Composable
 fun TimetableScreen() {
@@ -82,7 +113,7 @@ fun TimetableScreen() {
                 title = "Math",
                 room = "B-101",
                 day = DayOfWeek.MONDAY,
-                startTime = "8 AM",
+                startTime = "08 AM",
                 endTime = "10 AM"
             ),
             TimetableEntry(
@@ -91,14 +122,14 @@ fun TimetableScreen() {
                 room = "AB-100",
                 day = DayOfWeek.TUESDAY,
                 startTime = "12 PM",
-                endTime = "2 PM"
+                endTime = "02 PM"
             ),
             TimetableEntry(
                 id = 3,
                 title = "App Programming",
                 room = "B-400",
                 day = DayOfWeek.TUESDAY,
-                startTime = "8 AM",
+                startTime = "08 AM",
                 endTime = "10 AM"
             ),
             TimetableEntry(
@@ -106,8 +137,8 @@ fun TimetableScreen() {
                 title = "Physics",
                 room = "A-111",
                 day = DayOfWeek.FRIDAY,
-                startTime = "2 PM",
-                endTime = "4 PM"
+                startTime = "02 PM",
+                endTime = "04 PM"
             ),
             TimetableEntry(
                 id = 5,
@@ -115,7 +146,7 @@ fun TimetableScreen() {
                 room = "B-404",
                 day = DayOfWeek.THURSDAY,
                 startTime = "11 AM",
-                endTime = "4 PM"
+                endTime = "04 PM"
             )
         )
 
@@ -137,6 +168,10 @@ fun TimetableScreen() {
         "08 PM",
         "09 PM"
     )
+
+    //shared height for each timetable hour slot to keep
+    // the timeline, grid and lecture cards aligned.
+    val hourSlotHeight = 56.dp
 
 
     Scaffold(
@@ -160,8 +195,8 @@ fun TimetableScreen() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    start = 24.dp,
-                    end = 24.dp,
+                    start = 16.dp,
+                    end = 16.dp,
                     top = 24.dp,
                     bottom = innerPadding.calculateBottomPadding()
                 )
@@ -199,7 +234,7 @@ fun TimetableScreen() {
             Spacer(modifier = Modifier.height(18.dp))
 
             Column {
-                // weekdays
+                // Weekdays ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -214,13 +249,19 @@ fun TimetableScreen() {
                 }
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Column(modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())) {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-
-                        Column(modifier = Modifier.width(56.dp)) {
-                            // time slots 8AM - 9PM
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(700.dp)
+                    ) {
+                        // times left site ->
+                        Column(modifier = Modifier.width(44.dp)) {
+                            // Time slots 8AM - 9PM ->
                             hours.forEach { hour ->
                                 Text(
                                     text = hour,
@@ -230,10 +271,63 @@ fun TimetableScreen() {
                                 Spacer(modifier = Modifier.height(24.dp))
                             }
                         }
-                        Box(modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 12.dp)) {
-                            // Timetable lines
+                        // Grid ->
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                            //.padding(start = 1.dp)
+                        ) {
+                            // Horizontal timetable lines ->
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                hours.forEach { _ ->
+                                    HorizontalDivider(
+                                        thickness = 1.dp,
+                                        color = MaterialTheme.colorScheme.outlineVariant
+                                    )
+                                    Spacer(modifier = Modifier.height(48.dp))
+                                }
+                            }
+                            //Vertical timetable lines ->
+                            Row(
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                DayOfWeek.entries.forEachIndexed { index, day ->
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxHeight()
+                                    ) {
+                                        if (index < DayOfWeek.entries.lastIndex) {
+                                            VerticalDivider(
+                                                modifier = Modifier
+                                                    .align(Alignment.CenterEnd)
+                                                    .fillMaxHeight(),
+                                                thickness = 1.dp,
+                                                color = MaterialTheme.colorScheme.outlineVariant
+                                            )
+
+                                        }
+                                    }
+                                }
+
+                            }
+                            val entry = timetableEntries.first()
+                            val column = mapDayToColumn(entry.day)
+                            val row = mapTimeToRow(entry.startTime, hours)
+
+                            val endRow = mapTimeToRow(entry.endTime, hours)
+                            val duration = endRow - row
+                            val lectureHeight = hourSlotHeight * duration
+
+                            val columnWidth = 70.dp
+                            val xOffset = column * columnWidth
+                            val yOffset = row * hourSlotHeight
+
+                            LectureCard(
+                                modifier = Modifier.offset(x = xOffset, y = yOffset),
+                                entry = entry,
+                                lectureHeight = lectureHeight
+                            )
                         }
                     }
                 }
@@ -250,7 +344,7 @@ fun DayChip(day: String, date: String, isSelected: Boolean, onClick: () -> Unit)
 
     Box(
         modifier = Modifier
-            .size(width = 48.dp, height = 64.dp)
+            .size(width = 42.dp, height = 64.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(if (isSelected) Color(0xFFA78BFA) else Color.Transparent)
             .clickable { onClick() }, contentAlignment = Alignment.Center
@@ -271,3 +365,24 @@ fun DayChip(day: String, date: String, isSelected: Boolean, onClick: () -> Unit)
 }
 
 
+@Composable
+fun LectureCard(modifier: Modifier = Modifier, entry: TimetableEntry, lectureHeight: Dp) {
+    Card(
+        modifier = modifier
+            .width(70.dp)
+            .height(lectureHeight)
+            .padding(2.dp),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)) {
+            Text(text = entry.title, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(text = entry.room, fontSize = 13.sp)
+            Spacer(modifier = Modifier.height(1.dp))
+            Text(
+                text = formatLectureTime(start = entry.startTime, end = entry.endTime),
+                fontSize = 13.sp
+            )
+        }
+    }
+}
