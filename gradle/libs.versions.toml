@@ -1,4 +1,6 @@
 [versions]
+retrofit = "2.11.0"
+gsonConverter = "2.11.0"
 agp = "9.2.1"
 coreKtx = "1.18.0"
 junit = "4.13.2"
@@ -10,6 +12,8 @@ kotlin = "2.2.10"
 composeBom = "2026.02.01"
 
 [libraries]
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit"}
+retrofit-gson = {group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "gsonConverter"}
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
