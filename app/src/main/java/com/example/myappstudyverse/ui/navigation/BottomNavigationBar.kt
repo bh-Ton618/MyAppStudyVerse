@@ -22,9 +22,9 @@ fun BottomNavigationBar(navController: NavController) {
 
     NavigationBar {
         NavigationBarItem(
-            selected = currentScreen == "dashbaord",
+            selected = currentScreen == "dashboard",
             onClick = {
-                navController.navigate("dashbaord")
+                navController.navigate("dashboard")
             },
             icon = {
                 Icon(

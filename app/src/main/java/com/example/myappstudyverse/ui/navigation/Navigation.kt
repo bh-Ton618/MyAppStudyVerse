@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.myappstudyverse.ui.screens.DashboardScreen
 import com.example.myappstudyverse.ui.screens.NotesScreen
@@ -19,18 +20,24 @@ import com.example.myappstudyverse.ui.screens.TimetableScreen
 fun StudyVerseNavigation() {
 
     val navController: NavHostController = rememberNavController()
+    val currentNavigationState = navController.currentBackStackEntryAsState()
+    val currentScreen = currentNavigationState.value?.destination?.route
+
+
 
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(navController)
+            if (currentScreen != "space") {
+                BottomNavigationBar(navController)
+            }
         }
     ) { innerPadding ->
         NavHost(
             modifier = Modifier.padding(innerPadding),
             navController = navController,
-            startDestination = "dashbaord"
+            startDestination = "dashboard"
         ) {
-            composable("dashbaord") {
+            composable("dashboard") {
                 DashboardScreen(navController)
             }
             composable("tasks") {
@@ -43,7 +50,7 @@ fun StudyVerseNavigation() {
                 NotesScreen()
             }
             composable("space") {
-                SpaceScreen()
+                SpaceScreen(navController)
             }
         }
     }
