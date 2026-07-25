@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.myappstudyverse.ui.screens.AuthScreen
 import com.example.myappstudyverse.ui.screens.DashboardScreen
 import com.example.myappstudyverse.ui.screens.NotesScreen
 import com.example.myappstudyverse.ui.screens.SpaceScreen
@@ -26,17 +27,21 @@ fun StudyVerseNavigation() {
 
 
     Scaffold(
+        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0),
         bottomBar = {
-            if (currentScreen != "space") {
+            if (currentScreen != "space" && currentScreen != "auth") {
                 BottomNavigationBar(navController)
             }
-        }
-    ) { innerPadding ->
+        }) { innerPadding ->
         NavHost(
             modifier = Modifier.padding(innerPadding),
             navController = navController,
-            startDestination = "dashboard"
+            startDestination = "auth"
         ) {
+            composable("auth") {
+
+                AuthScreen(navController)
+            }
             composable("dashboard") {
                 DashboardScreen(navController)
             }
