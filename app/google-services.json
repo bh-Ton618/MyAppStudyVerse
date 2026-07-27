@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "822892255358",
+    "project_id": "studyverse-b540b",
+    "storage_bucket": "studyverse-b540b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:822892255358:android:1f2b178fc804a63f0fe02f",
+        "android_client_info": {
+          "package_name": "com.example.myappstudyverse"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBzwUErbt5bWU2247PcoYno3W0IrDIq3K0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

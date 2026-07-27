@@ -15,9 +15,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -34,11 +38,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.myappstudyverse.R
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 
 
 enum class AuthState {
@@ -56,14 +67,30 @@ fun AuthScreen(navController: NavHostController) {
     var authState by remember { mutableStateOf(AuthState.EMAIL_ONLY) }
 
     var emailInput by remember { mutableStateOf("") }
-    var userName by remember { mutableStateOf("") }
+    var userNameInput by remember { mutableStateOf("") }
     var passwordInput by remember { mutableStateOf("") }
 
+// The following 2 variables below are specifically for the use case that a user encounters a login or registration error. See code line start from 171 to 273 ->
+    var loginErrorMessage by remember { mutableStateOf("") }
+    var registrationErrorMessage by remember { mutableStateOf("") }
+
+    //The following 2 variables below are specifically for the use case that a verification email couldn't be sent to the user (check -> AuthState.EMAIL_NOT_VERIFIED from code line 316 to 358 ->
+    var verificationEmailMessage by remember { mutableStateOf("Please verify your email to continue.If you haven't received the email yet, you can resend it below.") }
+    var isVerificationEmailError by remember { mutableStateOf(false) }
+
+
+    val fireBaseAuth = FirebaseAuth.getInstance()
 
     val topSpacing = when (authState) {
         AuthState.EMAIL_ONLY -> 50.dp
-        AuthState.LOGIN -> 36.dp
-        AuthState.REGISTER -> 16.dp
+        AuthState.LOGIN ->
+            if (registrationErrorMessage.isNotEmpty()) 80.dp
+            else 110.dp
+
+        AuthState.REGISTER ->
+            if (registrationErrorMessage.isNotEmpty()) 20.dp
+            else 50.dp
+
         AuthState.VERIFY_SENT -> 400.dp
         AuthState.EMAIL_NOT_VERIFIED -> 320.dp
         AuthState.LOGIN_SUCCESS -> 500.dp
@@ -141,29 +168,84 @@ fun AuthScreen(navController: NavHostController) {
                         value = emailInput,
                         onValueChange = { newEmail -> emailInput = newEmail })
                     Spacer(modifier = Modifier.height(16.dp))
-                    AuthButton(text = "Continue", onClick = { authState = AuthState.LOGIN })
+                    AuthButton(text = "Log In", onClick = { authState = AuthState.LOGIN })
+                    Spacer(modifier = Modifier.height(16.dp))
+                    AuthButton(text = "Create Account", onClick = {
+                        authState = AuthState.REGISTER
+
+                    })
                 }
 
                 AuthState.LOGIN -> {
-                    EmailTextField(
-                        value = emailInput,
-                        onValueChange = { newEmail -> emailInput = newEmail })
-                    Spacer(modifier = Modifier.height(16.dp))
+                    if (loginErrorMessage.isNotEmpty()) {
+                        Text(
+                            text = loginErrorMessage,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 22.dp),
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                     PWTextField(
                         value = passwordInput,
                         onValueChange = { newPassword -> passwordInput = newPassword })
                     Spacer(modifier = Modifier.height(16.dp))
-                    AuthButton(text = "Log In", onClick = { authState = AuthState.REGISTER })
+                    AuthButton(text = "Log In", onClick = {
+                        FirebaseAuth.getInstance()
+                            .signInWithEmailAndPassword(emailInput, passwordInput)
+                            .addOnCompleteListener { login ->
+                                if (login.isSuccessful) {
+                                    val currentUser = FirebaseAuth.getInstance().currentUser
+                                    currentUser
+                                        ?.reload()
+                                        ?.addOnCompleteListener { userReload ->
+                                            if (userReload.isSuccessful) {
+                                                if (currentUser.isEmailVerified) {
+                                                    authState = AuthState.LOGIN_SUCCESS
+                                                } else {
+                                                    authState = AuthState.EMAIL_NOT_VERIFIED
+                                                }
+                                            }
+                                        }
+                                } else {
+                                    when (login.exception) {
+                                        is FirebaseAuthInvalidCredentialsException -> {
+                                            loginErrorMessage =
+                                                "Incorrect email or password. Please try again."
+                                        }
+
+                                        is FirebaseAuthInvalidUserException -> {
+                                            loginErrorMessage =
+                                                "No account found. PLease create an account."
+                                        }
+
+                                        else -> {
+                                            loginErrorMessage = "Login failed. Please try again."
+                                        }
+                                    }
+                                }
+                            }
+                    })
                 }
 
+
                 AuthState.REGISTER -> {
-                    EmailTextField(
-                        value = emailInput,
-                        onValueChange = { newEmail -> emailInput = newEmail })
-                    Spacer(modifier = Modifier.height(16.dp))
+                    if (registrationErrorMessage.isNotEmpty()) {
+                        Text(
+                            text = registrationErrorMessage,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 22.dp),
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                     UserNameTextField(
-                        value = userName,
-                        onValueChange = { newUserName -> userName = newUserName })
+                        value = userNameInput,
+                        onValueChange = { newUserName -> userNameInput = newUserName })
                     Spacer(modifier = Modifier.height(16.dp))
                     PWTextField(
                         value = passwordInput,
@@ -171,7 +253,31 @@ fun AuthScreen(navController: NavHostController) {
                     Spacer(modifier = Modifier.height(16.dp))
                     AuthButton(
                         text = "Create Account",
-                        onClick = { authState = AuthState.VERIFY_SENT })
+                        onClick = {
+                            fireBaseAuth.createUserWithEmailAndPassword(emailInput, passwordInput)
+                                .addOnCompleteListener { registration ->
+                                    if (registration.isSuccessful) {
+                                        FirebaseAuth.getInstance().currentUser?.sendEmailVerification()
+                                            ?.addOnCompleteListener { emailSendVerification ->
+                                                if (emailSendVerification.isSuccessful) {
+                                                    authState = AuthState.VERIFY_SENT
+                                                }
+                                            }
+                                    } else {
+                                        when (registration.exception) {
+                                            is FirebaseAuthUserCollisionException -> {
+                                                registrationErrorMessage =
+                                                    "An account with this email already exists. Please log in instead."
+                                            }
+
+                                            else -> {
+                                                registrationErrorMessage =
+                                                    "Registration failed. Please try again."
+                                            }
+                                        }
+                                    }
+                                }
+                        })
                 }
 
                 AuthState.VERIFY_SENT -> {
@@ -198,7 +304,20 @@ fun AuthScreen(navController: NavHostController) {
                     Spacer(modifier = Modifier.height(120.dp))
                     AuthButton(
                         text = "I've verified my email",
-                        onClick = { authState = AuthState.EMAIL_NOT_VERIFIED })
+                        onClick = {
+                            val currentUser = FirebaseAuth.getInstance().currentUser
+                            currentUser
+                                ?.reload()
+                                ?.addOnCompleteListener { userReload ->
+                                    if (userReload.isSuccessful) {
+                                        if (currentUser.isEmailVerified) {
+                                            authState = AuthState.LOGIN_SUCCESS
+                                        } else {
+                                            authState = AuthState.EMAIL_NOT_VERIFIED
+                                        }
+                                    }
+                                }
+                        })
                 }
 
                 AuthState.EMAIL_NOT_VERIFIED -> {
@@ -218,15 +337,31 @@ fun AuthScreen(navController: NavHostController) {
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Please check your inbox and try again.",
-                        color = Color.White,
+                        text = verificationEmailMessage,
+                        color = if (isVerificationEmailError)
+                            MaterialTheme.colorScheme.error
+                        else
+                            Color.White,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Normal
                     )
                     Spacer(modifier = Modifier.height(250.dp))
                     AuthButton(
                         text = "Resend Verification email",
-                        onClick = { authState = AuthState.LOGIN_SUCCESS })
+                        onClick = {
+                            FirebaseAuth.getInstance()
+                                .currentUser
+                                ?.sendEmailVerification()
+                                ?.addOnCompleteListener { resendVerificationEmail ->
+                                    if (resendVerificationEmail.isSuccessful) {
+                                        authState = AuthState.VERIFY_SENT
+                                    } else {
+                                        verificationEmailMessage =
+                                            "We couldn't send a verification email. Please check your internet connection and try again."
+                                        isVerificationEmailError = true
+                                    }
+                                }
+                        })
                 }
 
                 AuthState.LOGIN_SUCCESS -> {
@@ -246,7 +381,13 @@ fun AuthScreen(navController: NavHostController) {
                     Spacer(modifier = Modifier.height(90.dp))
                     AuthButton(
                         text = "Go to Dashboard",
-                        onClick = { authState = AuthState.EMAIL_ONLY })
+                        onClick = {
+                            navController.navigate("dashboard") {
+                                popUpTo("auth") {
+                                    inclusive = true
+                                }
+                            }
+                        })
                 }
             }
 
@@ -264,6 +405,7 @@ fun EmailTextField(value: String, onValueChange: (String) -> Unit) {
             .padding(horizontal = 22.dp),
         value = value,
         onValueChange = onValueChange,
+        singleLine = true,
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Email,
@@ -302,6 +444,7 @@ fun UserNameTextField(value: String, onValueChange: (String) -> Unit) {
             .padding(horizontal = 22.dp),
         value = value,
         onValueChange = onValueChange,
+        singleLine = true,
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Person,
@@ -334,17 +477,42 @@ fun UserNameTextField(value: String, onValueChange: (String) -> Unit) {
 
 @Composable
 fun PWTextField(value: String, onValueChange: (String) -> Unit) {
+
+    var passwordVisible by remember { mutableStateOf(false) }
+
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 22.dp),
         value = value,
         onValueChange = onValueChange,
+        singleLine = true,
+        visualTransformation =
+            if (passwordVisible)
+                VisualTransformation.None
+            else
+                PasswordVisualTransformation(),
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Lock,
                 contentDescription = null
             )
+        },
+        trailingIcon = {
+            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                if (passwordVisible) {
+                    Icon(
+                        imageVector = Icons.Default.Visibility,
+                        contentDescription = "Hide password"
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.VisibilityOff,
+                        contentDescription = "Show password"
+                    )
+
+                }
+            }
         },
         placeholder = {
             Text("Password")
