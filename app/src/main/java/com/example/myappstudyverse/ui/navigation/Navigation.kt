@@ -17,10 +17,13 @@ import com.example.myappstudyverse.ui.screens.TasksScreen
 import com.example.myappstudyverse.ui.screens.TimetableScreen
 
 
+// Configures the application's navigation graph and screen routing.
 @Composable
 fun StudyVerseNavigation() {
 
+    // Creates and remembers the navigation controller used throughout the app.
     val navController: NavHostController = rememberNavController()
+    // Determines the currently displayed screen.
     val currentNavigationState = navController.currentBackStackEntryAsState()
     val currentScreen = currentNavigationState.value?.destination?.route
 
@@ -29,14 +32,17 @@ fun StudyVerseNavigation() {
     Scaffold(
         contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0),
         bottomBar = {
+            // Hides the bottom navigation on full screen pages.
             if (currentScreen != "space" && currentScreen != "auth") {
                 BottomNavigationBar(navController)
             }
         }) { innerPadding ->
+
+        // Defines all navigation destinations within the application.
         NavHost(
             modifier = Modifier.padding(innerPadding),
             navController = navController,
-            startDestination = "auth"
+            startDestination = "dashboard"
         ) {
             composable("auth") {
 

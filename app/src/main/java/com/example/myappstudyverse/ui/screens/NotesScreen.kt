@@ -65,12 +65,14 @@ enum class NoteSortOption {
 
 @Composable
 fun NotesHeaderArtWork() {
-    //TODO: Insert artwork here later
+    // TODO: Insert artwork here later
 }
 
+// Main notes screen with search, sorting and pinned management.
 @Composable
 fun NotesScreen() {
 
+    // Stores the current UI state for searching, sorting and pinned note visibility.
     var isSearchOpen by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
     var isFilterMenuExpanded by remember { mutableStateOf(false) }
@@ -78,6 +80,7 @@ fun NotesScreen() {
     var isPinnedSectionExpanded by remember { mutableStateOf(true) }
 
 
+    // Sample note data used for demonstrating note management features.
     val notesList = remember {
         mutableStateListOf(
             Note(id = 1, "About Biology", "02.08.2026", "Learned today that ...", isPinned = true),
@@ -139,8 +142,8 @@ fun NotesScreen() {
             )
         )
     }
-    // Step 1: Sort notes ->
-    //TODO: Replace ID sorting with createdTimeStamp after introducing persistent storage
+    // Sorts notes while always keping pinned notes at the top.
+    // TODO: Replace ID sorting with createdTimeStamp after introducing persistent storage.
     val sortedNotesList = when (selectedSortOption) {
         NoteSortOption.NEWEST ->
             notesList.sortedWith(compareByDescending<Note> { note -> note.isPinned }.thenByDescending { note -> note.id })
@@ -155,7 +158,7 @@ fun NotesScreen() {
             notesList.sortedWith(compareByDescending<Note> { note -> note.isPinned }.thenByDescending { note -> note.title })
     }
 
-// Step 2: Filter notes based on the search query ->
+// Filters notes based on the entered search query.
     val filteredNotesList = sortedNotesList.filter { note ->
         note.title.contains(searchText, ignoreCase = true) ||
                 note.description.contains(searchText, ignoreCase = true)
@@ -165,6 +168,7 @@ fun NotesScreen() {
 
 
     Scaffold(
+        // Placeholder button for creating new notes in a future version.
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {},
@@ -275,6 +279,7 @@ fun NotesScreen() {
                 }
             }
 
+            // Displays the search when search mode is enabled.
             if (isSearchOpen) {
                 OutlinedTextField(
                     value = searchText,
@@ -290,10 +295,11 @@ fun NotesScreen() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-
+            // Separates pinned regular notes for independent display.
             val pinnedNotes = filteredNotesList.filter { note -> note.isPinned }
             val unpinnedNotes = filteredNotesList.filter { note -> !note.isPinned }
 
+            // Allows the pinned notes section to be expanded or collapsed.
             if (pinnedNotes.isNotEmpty()) {
 
                 Row(
@@ -312,15 +318,15 @@ fun NotesScreen() {
                                 Icons.Filled.KeyboardArrowDown
                             else
                                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = "Toogle pinned notes"
+                        contentDescription = "Toggle pinned notes"
                     )
 
                 }
             }
 
 
-            // Scrollable list of all notes
-            // Only visible elements will be rendered (Lazy Loading)
+            // Displays all notes in a scrollable list.
+            // LazyColumn renders only visible items ti improve performance.
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
 
                 if (isPinnedSectionExpanded) {
@@ -331,7 +337,7 @@ fun NotesScreen() {
                         NoteCard(
                             note = note,
                             onNoteClick = {
-                                //TODO: //
+                                // TODO: Navigate to the note detail screen.
                             }
                         )
                     }
@@ -353,7 +359,7 @@ fun NotesScreen() {
                     NoteCard(
                         note = note,
                         onNoteClick = {
-                            //TODO: //
+                            // TODO: Navigate to the note detail screen.
                         }
                     )
                 }
@@ -365,7 +371,7 @@ fun NotesScreen() {
 }
 
 
-//Displays a single noteCard
+// Reusable card displaying a single note.
 @Composable
 fun NoteCard(
     note: Note,
@@ -379,6 +385,7 @@ fun NoteCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
+            // Displays a pin icon for pinned notes.
             if (note.isPinned) {
                 Icon(
                     imageVector = Icons.Default.PushPin,

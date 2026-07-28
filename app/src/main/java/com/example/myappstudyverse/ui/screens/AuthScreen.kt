@@ -56,6 +56,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 
 
+// Defines all UI states of the authentication flow displayed within the AuthScreen.
 enum class AuthState {
     EMAIL_ONLY,
     LOGIN,
@@ -65,26 +66,31 @@ enum class AuthState {
     LOGIN_SUCCESS
 }
 
+//Main authentication screen that manages login, registration and email verification.
 @Composable
 fun AuthScreen(navController: NavHostController) {
 
+    // Stores the current authentication state and controls which UI is displayed.
     var authState by remember { mutableStateOf(AuthState.EMAIL_ONLY) }
 
     var emailInput by remember { mutableStateOf("") }
     var userNameInput by remember { mutableStateOf("") }
     var passwordInput by remember { mutableStateOf("") }
 
-// The following 3 variables below are specifically for the use cases that a user encounters an exception error (Firebase Exceptions) ->
+
+    // Stores Firebase authentication error messages for different authentication scenarios.
     var loginErrorMessage by remember { mutableStateOf("") }
     var registrationErrorMessage by remember { mutableStateOf("") }
     var verificationEmailErrorMessage by remember { mutableStateOf("") }
 
-    // The following variable is used for user input validation. Input fields are not allowed to be empty! ->
+    // Displays validation messages when required input fields are left empty.
     var inputValidationMessage by remember { mutableStateOf("") }
 
-
+    // Provides access to Firebase Authentication services.
     val fireBaseAuth = FirebaseAuth.getInstance()
 
+
+    // Dynamically adjusts vertical spacing depending on the current authentication state.
     val topSpacing = when (authState) {
         AuthState.EMAIL_ONLY ->
             if (inputValidationMessage.isNotEmpty()) 20.dp
@@ -100,21 +106,35 @@ fun AuthScreen(navController: NavHostController) {
             else 50.dp
 
         AuthState.VERIFY_SENT -> 400.dp
+
         AuthState.EMAIL_NOT_VERIFIED ->
-            if (verificationEmailErrorMessage.isNotEmpty()) 280.dp
-            else 320.dp
+            310.dp
 
         AuthState.LOGIN_SUCCESS -> 500.dp
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    // Dynamically reduces spacing when additional messages need to be displayed.
+    val bottomSpacing = when (authState) {
+        AuthState.REGISTER ->
+            if (registrationErrorMessage.isNotEmpty()) 170.dp
+            else 210.dp
 
+        AuthState.EMAIL_NOT_VERIFIED ->
+            if (verificationEmailErrorMessage.isNotEmpty()) 140.dp
+            else 190.dp
+
+        else -> 250.dp
+    }
+
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Selects the background image for the current authentication state.
         val background = when (authState) {
             AuthState.EMAIL_NOT_VERIFIED -> R.drawable.auth_email_not_verified_background
             AuthState.LOGIN_SUCCESS -> R.drawable.auth_email_verified_background
             else -> R.drawable.auth_background
         }
-
+        // Hides the StudyVerse branding on confirmation and success screens.
         val showBranding = when (authState) {
             AuthState.VERIFY_SENT,
             AuthState.EMAIL_NOT_VERIFIED,
@@ -173,7 +193,7 @@ fun AuthScreen(navController: NavHostController) {
             // This Spacer is dynamic and changes height based on the current AuthState ->
             Spacer(modifier = Modifier.height(topSpacing))
 
-
+            // Displays the UI for the currently active authentication state.
             when (authState) {
                 AuthState.EMAIL_ONLY -> {
                     if (inputValidationMessage.isNotEmpty()) {
@@ -241,12 +261,13 @@ fun AuthScreen(navController: NavHostController) {
                             loginErrorMessage = ""
                         } else {
                             inputValidationMessage = ""
-
+                            // Authenticates the user with Firebase Authentication.
                             FirebaseAuth.getInstance()
                                 .signInWithEmailAndPassword(emailInput, passwordInput)
                                 .addOnCompleteListener { login ->
                                     if (login.isSuccessful) {
                                         val currentUser = FirebaseAuth.getInstance().currentUser
+                                        //Reloads the user to retrieve the latest email verification status.
                                         currentUser
                                             ?.reload()
                                             ?.addOnCompleteListener { userReload ->
@@ -345,13 +366,14 @@ fun AuthScreen(navController: NavHostController) {
                                 inputValidationMessage = "Please enter a password."
                                 registrationErrorMessage = ""
                             } else {
-
+                                // Creates a new Firebase account using the entered email and password.
                                 fireBaseAuth.createUserWithEmailAndPassword(
                                     emailInput,
                                     passwordInput
                                 )
                                     .addOnCompleteListener { registration ->
                                         if (registration.isSuccessful) {
+                                            //Sends an email verification link to the newly registered user.
                                             FirebaseAuth.getInstance().currentUser?.sendEmailVerification()
                                                 ?.addOnCompleteListener { emailSendVerification ->
                                                     if (emailSendVerification.isSuccessful) {
@@ -374,11 +396,17 @@ fun AuthScreen(navController: NavHostController) {
                                     }
                             }
                         })
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     AuthHyperlink(
                         text = "Already have an account? ",
                         linkText = "Log In",
-                        onClick = { authState = AuthState.EMAIL_ONLY })
+                        onClick = {
+                            registrationErrorMessage = ""
+                            inputValidationMessage = ""
+                            passwordInput = ""
+                            userNameInput = ""
+                            authState = AuthState.EMAIL_ONLY
+                        })
                 }
 
                 AuthState.VERIFY_SENT -> {
@@ -408,6 +436,7 @@ fun AuthScreen(navController: NavHostController) {
                         onClick = {
                             val currentUser = FirebaseAuth.getInstance().currentUser
                             currentUser
+                                //Checks if the user has verified the email address.
                                 ?.reload()
                                 ?.addOnCompleteListener { userReload ->
                                     if (userReload.isSuccessful) {
@@ -422,6 +451,25 @@ fun AuthScreen(navController: NavHostController) {
                 }
 
                 AuthState.EMAIL_NOT_VERIFIED -> {
+                    Text(
+                        text = "Email not verified",
+                        color = Color.White,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Please verify your email to continue. If needed, request a new verification email below.",
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Normal,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 22.dp)
+                    )
+                    Spacer(modifier = Modifier.height(bottomSpacing))
+
                     if (verificationEmailErrorMessage.isNotEmpty()) {
                         Text(
                             text = verificationEmailErrorMessage,
@@ -431,27 +479,30 @@ fun AuthScreen(navController: NavHostController) {
                                 .padding(horizontal = 22.dp),
                             textAlign = TextAlign.Center
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
-                    Text(
-                        text = "Email not verified",
-                        color = Color.White,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Please verify your email to continue. If you haven't received the email yet, you can resend it below.",
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Normal
-                    )
-                    Spacer(modifier = Modifier.height(250.dp))
+                    AuthButton(text = "I've verified my email", onClick = {
+                        verificationEmailErrorMessage = ""
+                        FirebaseAuth.getInstance()
+                            .currentUser
+                            ?.reload()
+                            ?.addOnCompleteListener {
+                                val currentUser = FirebaseAuth.getInstance().currentUser
+                                if (currentUser?.isEmailVerified == true) {
+                                    authState = AuthState.LOGIN_SUCCESS
+                                } else {
+                                    authState = AuthState.EMAIL_NOT_VERIFIED
+                                }
+                            }
+                    })
+                    Spacer(modifier = Modifier.height(10.dp))
+
                     AuthButton(
-                        text = "Resend Verification email",
+                        text = "Resend verification email",
                         onClick = {
                             FirebaseAuth.getInstance()
                                 .currentUser
+                                // Sends another verification email if the previous one was not received.
                                 ?.sendEmailVerification()
                                 ?.addOnCompleteListener { resendVerificationEmail ->
                                     if (resendVerificationEmail.isSuccessful) {
@@ -465,7 +516,7 @@ fun AuthScreen(navController: NavHostController) {
 
                                             is FirebaseTooManyRequestsException ->
                                                 verificationEmailErrorMessage =
-                                                    "Too many request.Please wait a moment and try again."
+                                                    "A verification email was already sent recently. Please wait a moment before requesting another one."
 
                                             else -> {
                                                 verificationEmailErrorMessage =
@@ -477,10 +528,16 @@ fun AuthScreen(navController: NavHostController) {
                                     }
                                 }
                         })
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     AuthHyperlink(
                         linkText = "Back to Login",
-                        onClick = { authState = AuthState.LOGIN })
+                        onClick = {
+                            verificationEmailErrorMessage = ""
+                            passwordInput = ""
+                            userNameInput = ""
+                            inputValidationMessage = ""
+                            authState = AuthState.EMAIL_ONLY
+                        })
                 }
 
                 AuthState.LOGIN_SUCCESS -> {
@@ -501,6 +558,7 @@ fun AuthScreen(navController: NavHostController) {
                     AuthButton(
                         text = "Go to Dashboard",
                         onClick = {
+                            // Navigates to the dashboard and removes the authentication screen.
                             navController.navigate("dashboard") {
                                 popUpTo("auth") {
                                     inclusive = true
@@ -516,6 +574,7 @@ fun AuthScreen(navController: NavHostController) {
 }
 
 
+// Reusable email input field used throughout the authentication flow.
 @Composable
 fun EmailTextField(value: String, onValueChange: (String) -> Unit, isError: Boolean = false) {
     OutlinedTextField(
@@ -555,6 +614,7 @@ fun EmailTextField(value: String, onValueChange: (String) -> Unit, isError: Bool
 }
 
 
+// Reusable username input field for account registration.
 @Composable
 fun UserNameTextField(value: String, onValueChange: (String) -> Unit, isError: Boolean = false) {
 
@@ -596,6 +656,7 @@ fun UserNameTextField(value: String, onValueChange: (String) -> Unit, isError: B
 }
 
 
+// Reusable password input field with visibility toggle.
 @Composable
 fun PWTextField(value: String, onValueChange: (String) -> Unit, isError: Boolean = false) {
 
@@ -660,6 +721,7 @@ fun PWTextField(value: String, onValueChange: (String) -> Unit, isError: Boolean
 }
 
 
+// Shared button component used across all authentication states.
 @Composable
 fun AuthButton(text: String, onClick: () -> Unit) {
     Button(
@@ -679,9 +741,9 @@ fun AuthButton(text: String, onClick: () -> Unit) {
 }
 
 
+// Displays clickable text links for navigation within the authentication flow.
 @Composable
-fun AuthHyperlink(
-    modifier: Modifier = Modifier, text: String = "", linkText: String, underlined: Boolean = true, onClick: () -> Unit) {
+fun AuthHyperlink(modifier: Modifier = Modifier, text: String = "", linkText: String, underlined: Boolean = true, onClick: () -> Unit ) {
 
     val hyperLinkText = buildAnnotatedString {
         append(text)

@@ -58,8 +58,14 @@ data class Task(
     val dueDate: String = " ",
     val description: String = " ",
     val priority: Priority? = null,
-    var isDone: Boolean
+    var isDone: Boolean,
+    val type: TaskType = TaskType.TASK
 )
+
+enum class TaskType {
+    TASK,
+    EXAM
+}
 
 enum class Priority {
     HIGH,
@@ -79,9 +85,11 @@ fun TaskHeaderArtWork() {
     //TODO: Insert artwork here later
 }
 
+// Main task management screen with search, filtering and sorting functionality.
 @Composable
 fun TasksScreen() {
-    //Stores the currently selected task filter: All, to Do, Done
+
+    //Stores the current UI state for filtering, searching and sorting tasks.
     var selectedFilterChip by remember { mutableStateOf("All") }
     var isSearchOpen by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
@@ -89,6 +97,7 @@ fun TasksScreen() {
     var selectedSortOption by remember { mutableStateOf(TaskSortOption.PRIORITY) }
 
 
+    // Sample task data used to demonstrate task management features.
     val taskList = remember {
         mutableStateListOf(
             Task(
@@ -101,11 +110,12 @@ fun TasksScreen() {
             ),
             Task(
                 id = 2,
-                "Mathe Homework",
+                "Mathe Exam",
                 "29.07.2026",
-                "learn!",
+                "Study!",
                 priority = Priority.LOW,
-                false
+                false,
+                TaskType.EXAM
             ),
             Task(
                 id = 3,
@@ -174,7 +184,7 @@ fun TasksScreen() {
         )
     }
 
-    // Step 1: Sort tasks ->
+    // Sorts the task list based on the selected sort option.
     val sortedTaskList = when (selectedSortOption) {
 
         TaskSortOption.PRIORITY ->
@@ -191,7 +201,7 @@ fun TasksScreen() {
 
     }
 
-//Step 2: Filters the task list based on the selected filter.
+    // Filters the sorted task list by completion status and search query.
     val filteredTaskList = when (selectedFilterChip) {
         "All" -> sortedTaskList
         "to Do" -> sortedTaskList.filter { task -> !task.isDone }
@@ -207,6 +217,7 @@ fun TasksScreen() {
 
 
     Scaffold(
+        // Placeholder button adding new tasks in a future version.
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {},
@@ -294,7 +305,7 @@ fun TasksScreen() {
                         DropdownMenuItem(
                             text = { Text("Due Date") },
                             onClick = {
-                                selectedSortOption = TaskSortOption.PRIORITY
+                                selectedSortOption = TaskSortOption.DUE_DATE
                                 isFilterMenuExpanded = false
                             }
                         )
@@ -308,7 +319,7 @@ fun TasksScreen() {
                         DropdownMenuItem(
                             text = { Text("Created Date") },
                             onClick = {
-                                selectedSortOption = TaskSortOption.TITLE
+                                selectedSortOption = TaskSortOption.CREATED_DATE
                                 isFilterMenuExpanded = false
                             }
                         )
@@ -319,7 +330,7 @@ fun TasksScreen() {
 
 
             }
-
+            // Displays the search field only when search mode is enabled.
             if (isSearchOpen) {
                 OutlinedTextField(
                     value = searchText,
@@ -336,6 +347,7 @@ fun TasksScreen() {
             Spacer(modifier = Modifier.height(12.dp))
 
             Row {
+                // Allows users to filter tasks by completion status.
                 AppFilterChip(
                     text = "All",
                     isSelected = selectedFilterChip == "All",
@@ -362,8 +374,8 @@ fun TasksScreen() {
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Displays the filtered list of tasks.
-            // Only visible items are rendered to improve performance (Lazy Loading)
+            // Displays the filtered task list.
+            // LazyColumn renders only visible items to improve performance.
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(
                     items = filteredTaskList,
@@ -389,12 +401,13 @@ fun TasksScreen() {
     }
 }
 
-//Displays a single card item.
+// Reusable card displaying a single task, and it's current completion status.
 @Composable
 fun TaskCard(
     task: Task,
     onTaskChecked: () -> Unit
 ) {
+    // Maps each priority level to a corresponding indicator color.
     val priorityColor = when (task.priority) {
         Priority.HIGH -> Color(0xFF7C3AED)
         Priority.MEDIUM -> Color(0xFFA78BFA)

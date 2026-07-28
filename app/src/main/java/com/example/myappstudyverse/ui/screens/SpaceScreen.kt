@@ -59,17 +59,23 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 
+// Displays NASA's Astronomy Picture of the Day retrieved from the NASA APOD API.
 @Composable
 fun SpaceScreen(navController: NavHostController) {
+
+    // Stores the API response and possible error messages.
     var apodResponse by remember { mutableStateOf<ApodResponse?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
 
+    // Requests NASA's Astronomy Picture of the Day once when the screen is opened.
     LaunchedEffect(Unit) {
         try {
 
+            // Fetches the current Astronomy Picture of the Day from the NASA API.
             val response = RetrofitInstance.api.getPictureOfTheDay(BuildConfig.NASA_API_KEY)
             apodResponse = response
+            // Handles common network and server errors with user-friendly messages.
         } catch (e: SocketTimeoutException) {
 
             errorMessage =
@@ -146,6 +152,7 @@ fun SpaceScreen(navController: NavHostController) {
             }
         }
 
+        // Displays an error screen if the API request fails.
         if (errorMessage != null) {
 
             val messageToUser = errorMessage ?: return
@@ -175,10 +182,13 @@ fun SpaceScreen(navController: NavHostController) {
                     )
                 }
             }
+            // Displays a loading indicator while waiting for the API response.
         } else if (apodResponse == null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = Color(0XFF7C4DFF))
             }
+
+            //Displays the retrieved Astronomy Picture of the Day.
         } else {
 
             val loadedApodResponse = apodResponse ?: return
@@ -196,6 +206,7 @@ fun SpaceScreen(navController: NavHostController) {
                 parsedDate.format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH))
             }
 
+            // Removes unnecessary whitespace from the explanation text.
             val formattedExplanation =
                 loadedApodResponse.explanation.replace(Regex("\\s+"), " ").trim()
 
@@ -231,6 +242,8 @@ fun SpaceScreen(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.height(28.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+
+                    // Opens the official NASA APOD website in the device's web browser.
                     OutlinedButton(
                         onClick = {
                             val intent = Intent(
@@ -247,7 +260,7 @@ fun SpaceScreen(navController: NavHostController) {
                         Spacer(modifier = Modifier.height(6.dp))
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.OpenInNew,
-                            contentDescription = null,
+                            contentDescription = "NASA",
                             modifier = Modifier.size(18.dp)
                         )
                     }

@@ -15,7 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-//Reusable filter chip for selecting a task category.
+//Reusable filter chip used for selecting filter and view options.
 @Composable
 fun AppFilterChip(
     text: String,

@@ -26,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,9 +35,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 
-//Main dashboard screen which provides quick access to application features.
+//Main dashboard screen providing quick access to app's core features.
 @Composable
 fun DashboardScreen(
     navController: NavController,
@@ -44,6 +47,7 @@ fun DashboardScreen(
 ) {
 
     Scaffold(
+        // Floating action button reserved for creating future content (currently placeholder)
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {},
@@ -90,25 +94,27 @@ fun DashboardScreen(
     }
 }
 
-// Displays the welcome message for the user. 
+// Displays a personalized greeting and profile shortcut.
 @Composable
 fun GreetingSection() {
-    Column() {
+    Column {
         Row {
             Column(modifier = Modifier.weight(1f)) {
 
                 Text(
                     text = "Welcome back, Anna \uD83D\uDC4B"
                 )
+                val currentDate = LocalDate.now()
+                val formattedDate = currentDate.format(DateTimeFormatter.ofPattern("EEEE, MMMM d"))
                 Text(
-                    text = "Saturday, June 27"
+                    text = formattedDate
                 )
             }
             Box(
                 modifier = Modifier
                     .size(40.dp)
                     .clickable {
-                        //TODO: Navigate to profile
+                        //TODO: Navigate to profile.
                     }
                     .clip(CircleShape)
                     .background(Color.Gray),
@@ -121,8 +127,26 @@ fun GreetingSection() {
 }
 
 
+// Displays a daily motivational quote to encourage the user.
 @Composable
 fun MotivationSection(modifier: Modifier = Modifier) {
+
+    // TODO: Replace random selection with a daily quote based on the current date.
+    val motivationalQuotes = listOf(
+        "Shoot for the moon. Even if you miss, you'll land among the stars.",
+        "Every great journey begins with a single step into the unknown.",
+        "The stars remind us that even the darkest nights can shine.",
+        "Aim beyond the horizon—there's always another galaxy to explore.",
+        "Dream big enough to reach the stars.",
+        "Every star was once a cloud of dust with potential.",
+        "The universe rewards those who never stop exploring.",
+        "Your future is written among the stars you choose to follow.",
+        "Keep looking up. The sky is never the limit.",
+        "Great discoveries begin with the courage to launch."
+    )
+    val dailyQuote = remember { motivationalQuotes.random() }
+
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -151,7 +175,7 @@ fun MotivationSection(modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Shoot for the moon.\nEven if you miss,\nyou'll land among the stars.",
+                    text = dailyQuote,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
                     //color = Color.White
@@ -176,6 +200,7 @@ fun RocketIcon() {
     Text(text = "\uD83D\uDE80", fontSize = 40.sp)
 }
 
+// Displays a summary of today's tasks, classes and exams.
 @Composable
 fun TodayOverviewSection() {
     Column {
@@ -207,6 +232,7 @@ fun TodayOverviewSection() {
 
 }
 
+// Reusable card component for today's overview statistics.
 @Composable
 fun OverViewCard(modifier: Modifier = Modifier, icon: String, number: String, title: String) {
 
@@ -230,9 +256,10 @@ fun OverViewCard(modifier: Modifier = Modifier, icon: String, number: String, ti
     }
 }
 
+// Displays upcoming academic events and deadlines.
 @Composable
 fun UpComingSection() {
-    Column() {
+    Column {
         Text("Upcoming")
         Spacer(modifier = Modifier.height(8.dp))
         UpcomingCard(
@@ -258,9 +285,10 @@ fun UpComingSection() {
     }
 }
 
+// Reusable card displaying an upcoming activity or event.
 @Composable
 fun UpcomingCard(title: String, subtitle: String, icon: String) {
-    Card() {
+    Card {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),

@@ -74,9 +74,10 @@ enum class TimetableView {
 
 @Composable
 fun TimetableHeaderArtWork() {
-    //TODO: Insert artwork here later
+    // TODO: Insert artwork here later
 }
 
+// Converts weekdays into timetable column indices.
 private fun mapDayToColumn(day: DayOfWeek): Int {
     return when (day) {
         DayOfWeek.MONDAY -> 0
@@ -84,17 +85,16 @@ private fun mapDayToColumn(day: DayOfWeek): Int {
         DayOfWeek.WEDNESDAY -> 2
         DayOfWeek.THURSDAY -> 3
         DayOfWeek.FRIDAY -> 4
-        //OR shorter:
-        //private fun dayToColumn(day: DayOfWeek): Int {
-        //return day.ordinal }
     }
 }
 
+// Converts lecture start times into timetable row indices.
 private fun mapTimeToRow(time: String, hours: List<String>): Int {
     return hours.indexOf(time)
 }
 
 
+// Formats lecture times for compact display inside lecture cards.
 private fun formatLectureTime(start: String, end: String): String {
     val formattedStart = start.substringBefore(" ").trimStart('0')
     val formattedEnd = end.substringBefore(" ").trimStart('0')
@@ -102,12 +102,15 @@ private fun formatLectureTime(start: String, end: String): String {
 }
 
 
+// Main timetable screen providing week and day views of scheduled lectures.
 @Composable
 fun TimetableScreen() {
 
+    // Stores the currently selected timetable view.
     var selectedView by remember { mutableStateOf(TimetableView.WEEK) }
 
 
+    // Sample timetable data used for demonstrating the timetable layout.
     val timetableEntries = remember {
         mutableStateListOf(
             TimetableEntry(
@@ -194,6 +197,7 @@ fun TimetableScreen() {
 
     }
 
+    // Defines the timetable's hourly time slots.
     val hours = listOf(
         "08 AM",
         "09 AM",
@@ -211,8 +215,7 @@ fun TimetableScreen() {
         "09 PM"
     )
 
-    //shared height for each timetable hour slot to keep
-    // the timeline, grid and lecture cards aligned.
+    // Shared height for each timetable slot to keep the timeline, grid and cards aligned.
     val hourSlotHeight = 49.dp
 
 
@@ -296,11 +299,12 @@ fun TimetableScreen() {
 }
 
 
+// Displays the weekly timetable with lectures positioned in a timetable grid.
 @Composable
 fun WeekView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSlotHeight: Dp) {
 
     Column {
-        // Weekdays ->
+        // Displays the weekday selector.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -325,9 +329,9 @@ fun WeekView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSl
                     .fillMaxWidth()
                     .height(700.dp)
             ) {
-                // times left site ->
+                // Times left site.
                 Column(modifier = Modifier.width(44.dp)) {
-                    // Time slots 8AM - 9PM ->
+                    // Time slots 8AM - 9PM.
                     hours.forEach { hour ->
                         Text(
                             text = hour,
@@ -337,13 +341,13 @@ fun WeekView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSl
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                 }
-                // Grid ->
+                // Draws the timetable grid and places lecture cards at their calculated positions.
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .padding(start = 1.dp, end = 1.dp)
                 ) {
-                    // Horizontal timetable lines ->
+                    // Horizontal timetable lines.
                     Column(modifier = Modifier.fillMaxWidth()) {
                         hours.forEach { _ ->
                             HorizontalDivider(
@@ -353,7 +357,7 @@ fun WeekView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSl
                             Spacer(modifier = Modifier.height(48.dp))
                         }
                     }
-                    //Vertical timetable lines ->
+                    // Vertical timetable lines.
                     Row(
                         modifier = Modifier.fillMaxSize()
                     ) {
@@ -379,6 +383,7 @@ fun WeekView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSl
                     }
                     timetableEntries.forEach { entry ->
 
+                        // Calculates the lecture position within the timetable grid.
                         val column = mapDayToColumn(entry.day)
                         val row = mapTimeToRow(entry.startTime, hours)
 
@@ -404,6 +409,7 @@ fun WeekView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSl
 }
 
 
+// Displays the timetable for a single day.
 @Composable
 fun DayView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSlotHeight: Dp) {
 
@@ -457,6 +463,7 @@ fun DayView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSlo
                     }
                 }
                 timetableEntries
+                    // Displays only lectures scheduled for the selected day.
                     .filter { entry -> entry.day == DayOfWeek.MONDAY }
                     .forEach { entry ->
 
@@ -481,6 +488,7 @@ fun DayView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSlo
 }
 
 
+// Reusable chip representing a weekday in the timetable.
 @Composable
 fun DayChip(day: String, date: String, isSelected: Boolean, onClick: () -> Unit) {
 
@@ -507,6 +515,7 @@ fun DayChip(day: String, date: String, isSelected: Boolean, onClick: () -> Unit)
 }
 
 
+// Reusable card displaying lecture information within the timetable.
 @Composable
 fun LectureCard(
     modifier: Modifier = Modifier,
@@ -515,6 +524,7 @@ fun LectureCard(
     isDayView: Boolean = false
 ) {
 
+    // Adjusts the lecture size depending on the selected timetable view (Week/Day).
     val cardWidth =
         if (isDayView) 260.dp
         else 69.dp

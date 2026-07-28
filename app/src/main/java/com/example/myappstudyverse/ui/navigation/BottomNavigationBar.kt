@@ -13,13 +13,16 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
+
+// Displays the bottom navigation bar for switching between the main application screens.
 @Composable
 fun BottomNavigationBar(navController: NavController) {
 
-//Get the currently displayed screen to highlight the selected navigation icon
+    // Retrieves the current navigation route to highlight the selected navigation item.
     val currentNavigationState = navController.currentBackStackEntryAsState()
     val currentScreen = currentNavigationState.value?.destination?.route
 
+    // Privides navigation between the app's primary screens.
     NavigationBar {
         NavigationBarItem(
             selected = currentScreen == "dashboard",
