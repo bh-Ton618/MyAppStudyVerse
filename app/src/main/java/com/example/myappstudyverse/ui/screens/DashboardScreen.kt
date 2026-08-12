@@ -1,6 +1,7 @@
 package com.example.myappstudyverse.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,21 +21,29 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.CheckBox
+import androidx.compose.material.icons.outlined.CoPresent
+import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -45,24 +54,132 @@ fun DashboardScreen(
     navController: NavController,
     modifier: Modifier = Modifier
 ) {
+    var isFabExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         // Floating action button reserved for creating future content (currently placeholder)
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {},
-                modifier = Modifier.offset(y = 28.dp),
-                shape = CircleShape,
-                containerColor = Color(0xFFA78BFA)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add task",
-                    tint = Color.White
-                )
+
+            Box(contentAlignment = Alignment.BottomEnd)
+            {
+                FloatingActionButton(
+                    onClick = {
+                        isFabExpanded = !isFabExpanded
+                    },
+                    modifier = Modifier
+                        .offset(y = 28.dp)
+                        .alpha(if (isFabExpanded) 0f else 1f),
+                    shape = CircleShape,
+                    containerColor = Color(0xFFA78BFA)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add",
+                        tint = Color.White
+                    )
+                }
+                Box(
+                    contentAlignment = Alignment.BottomEnd
+                ) {
+                    Column(
+                        modifier = Modifier.offset(y = 20.dp),
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        if (isFabExpanded) {
+                            Row(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(Color.White)
+                                    .border(
+                                        width = 1.dp,
+                                        color = Color(0xFFA78BFA),
+                                        shape = RoundedCornerShape(50.dp)
+                                    )
+                                    .clickable {
+                                        isFabExpanded = false
+                                        // TODO: New Task
+                                    }
+                                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.CheckBox,
+                                    contentDescription = null,
+                                    tint = Color(0xFFA78BFA),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "New Task",
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(Color.White)
+                                    .border(
+                                        width = 1.dp,
+                                        color = Color(0xFFA78BFA),
+                                        shape = RoundedCornerShape(50.dp)
+                                    )
+                                    .clickable {
+                                        isFabExpanded = false
+                                        // TODO: New Lecture
+                                    }
+                                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.CoPresent,
+                                    contentDescription = null,
+                                    tint = Color(0xFFA78BFA),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "New Lecture",
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(Color.White)
+                                    .border(
+                                        width = 1.dp,
+                                        color = Color(0xFFA78BFA),
+                                        shape = RoundedCornerShape(50.dp)
+                                    )
+                                    .clickable {
+                                        isFabExpanded = false
+                                        // TODO: New Exam
+                                    }
+                                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.EditNote,
+                                    contentDescription = null,
+                                    tint = Color(0xFFA78BFA),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "New Exam",
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
-    ) { innerPadding ->
+    )
+
+    { innerPadding ->
+
 
         Column(
             modifier = modifier
@@ -97,12 +214,16 @@ fun DashboardScreen(
 // Displays a personalized greeting and profile shortcut.
 @Composable
 fun GreetingSection() {
+
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    val username = currentUser?.displayName?.ifBlank { "Space Explorer" } ?: "Space Explorer"
+
     Column {
         Row {
             Column(modifier = Modifier.weight(1f)) {
 
                 Text(
-                    text = "Welcome back, Anna \uD83D\uDC4B"
+                    text = "Welcome back, $username \uD83D\uDC4B"
                 )
                 val currentDate = LocalDate.now()
                 val formattedDate = currentDate.format(DateTimeFormatter.ofPattern("EEEE, MMMM d"))
@@ -119,7 +240,7 @@ fun GreetingSection() {
                     .clip(CircleShape)
                     .background(Color.Gray),
                 contentAlignment = Alignment.Center) {
-                Text("A")
+                Text(username.first().uppercase())
             }
 
         }
@@ -179,7 +300,6 @@ fun MotivationSection(modifier: Modifier = Modifier) {
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
                     //color = Color.White
-
                 )
 
             }
@@ -218,7 +338,7 @@ fun TodayOverviewSection() {
                 modifier = Modifier.weight(1f),
                 icon = "\uD83D\uDCDA",
                 number = "2",
-                title = "Classes"
+                title = "Lecture"
             )
             Spacer(modifier = Modifier.width(8.dp))
             OverViewCard(
@@ -328,5 +448,4 @@ fun UpcomingCard(title: String, subtitle: String, icon: String) {
         }
     }
 }
-
 

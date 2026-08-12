@@ -192,14 +192,32 @@ fun SpaceScreen(navController: NavHostController) {
         } else {
 
             val loadedApodResponse = apodResponse ?: return
+            if (loadedApodResponse.media_type == "image") {
 
-            AsyncImage(
-                model = loadedApodResponse.url,
-                contentDescription = loadedApodResponse.title,
-                modifier = Modifier.fillMaxWidth(),
-                contentScale = ContentScale.FillWidth
-            )
+                AsyncImage(
+                    model = loadedApodResponse.url,
+                    contentDescription = loadedApodResponse.title,
+                    modifier = Modifier.fillMaxWidth(),
+                    contentScale = ContentScale.FillWidth
+                )
+            } else if (loadedApodResponse.media_type == "video") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(220.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Today's NASA content is a video. Please click the button down below to watch it on NASA.",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
+                        textAlign = TextAlign.Center,
+                        color = Color.Gray
+                    )
+                }
 
+            }
             val formattedDate = loadedApodResponse.date.let { date ->
                 val parsedDate = LocalDate.parse(date)
 

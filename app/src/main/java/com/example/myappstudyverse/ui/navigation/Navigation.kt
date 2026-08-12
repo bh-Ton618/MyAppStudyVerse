@@ -52,7 +52,7 @@ fun StudyVerseNavigation() {
                 DashboardScreen(navController)
             }
             composable("tasks") {
-                TasksScreen()
+                TasksScreen(navController)
             }
             composable("timetable") {
                 TimetableScreen()

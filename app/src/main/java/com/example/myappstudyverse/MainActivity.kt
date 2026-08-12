@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import com.example.myappstudyverse.ui.navigation.StudyVerseNavigation
 import com.example.myappstudyverse.ui.theme.MyAppStudyVerseTheme
 
+// Entry point of the application that initializes the app theme and navigation.
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

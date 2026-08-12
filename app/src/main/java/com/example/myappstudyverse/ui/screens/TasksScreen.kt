@@ -2,6 +2,7 @@ package com.example.myappstudyverse.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,9 +23,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.outlined.AssignmentTurnedIn
 import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Card
@@ -47,8 +48,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.myappstudyverse.ui.components.AppFilterChip
 
 
@@ -87,7 +90,7 @@ fun TaskHeaderArtWork() {
 
 // Main task management screen with search, filtering and sorting functionality.
 @Composable
-fun TasksScreen() {
+fun TasksScreen(navController: NavHostController) {
 
     //Stores the current UI state for filtering, searching and sorting tasks.
     var selectedFilterChip by remember { mutableStateOf("All") }
@@ -226,7 +229,7 @@ fun TasksScreen() {
                 containerColor = Color(0xFFA78BFA)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Add,
+                    imageVector = Icons.Outlined.AssignmentTurnedIn,
                     contentDescription = "Add task",
                     tint = Color.White
                 )
@@ -384,15 +387,22 @@ fun TasksScreen() {
                     TaskCard(
                         task = task,
                         onTaskChecked = {
-                            val taskIndex = taskList.indexOfFirst {
-                                it.id == task.id
+                            val taskIndex = taskList.indexOfFirst { currentTask ->
+                                currentTask.id == task.id
                             }
                             if (taskIndex != -1) {
                                 taskList[taskIndex] = task.copy(
                                     isDone = !task.isDone
                                 )
                             }
-
+                        },
+                        onTaskDeleted = {
+                            taskList.removeAll { currentTask ->
+                                currentTask.id == task.id
+                            }
+                        },
+                        onTaskClick = {
+                            //TODO: Navigate to Task Detail Screen
                         }
                     )
                 }
@@ -405,17 +415,29 @@ fun TasksScreen() {
 @Composable
 fun TaskCard(
     task: Task,
-    onTaskChecked: () -> Unit
+    onTaskChecked: () -> Unit,
+    onTaskDeleted: () -> Unit,
+    onTaskClick: () -> Unit
 ) {
+
+    var isTaskLongPressMenuExpanded by remember { mutableStateOf(false) }
+
     // Maps each priority level to a corresponding indicator color.
     val priorityColor = when (task.priority) {
+
         Priority.HIGH -> Color(0xFF7C3AED)
         Priority.MEDIUM -> Color(0xFFA78BFA)
         Priority.LOW -> Color(0xFFD8B4FE)
         null -> Color.Transparent
 
     }
-    Card(modifier = Modifier.fillMaxWidth()) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = { onTaskClick() },
+                onLongClick = { isTaskLongPressMenuExpanded = true })
+    ) {
 
         Row(
             modifier = Modifier
@@ -460,18 +482,50 @@ fun TaskCard(
 
                     }
                 }
-
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(text = task.title, fontWeight = FontWeight.Bold)
                     Text(text = "Due: ${task.dueDate}", fontSize = 14.sp)
                 }
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = "Open"
-                )
             }
+        }
+
+        DropdownMenu(
+            expanded = isTaskLongPressMenuExpanded,
+            onDismissRequest = { isTaskLongPressMenuExpanded = false },
+            offset = DpOffset(
+                x = (-40).dp,
+                y = (-65).dp
+            ),
+            shape = RoundedCornerShape(18.dp),
+            border = androidx.compose.foundation.BorderStroke(
+                width = 1.dp,
+                color = Color(0xFFA78BFA)
+            )
+        ) {
+            DropdownMenuItem(
+                modifier = Modifier.height(30.dp),
+                text = {
+                    Text(
+                        text = "Delete",
+                        color = Color.DarkGray
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = Color(0xFFA78BFA)
+                    )
+                },
+                onClick = {
+                    isTaskLongPressMenuExpanded = false
+                    onTaskDeleted()
+                }
+            )
         }
     }
 }
+
+

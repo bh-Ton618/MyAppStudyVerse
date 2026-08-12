@@ -21,7 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CoPresent
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -165,7 +165,7 @@ fun TimetableScreen() {
                 id = 7,
                 title = "Business and Communications",
                 room = "B-101",
-                day = DayOfWeek.MONDAY,
+                day = DayOfWeek.WEDNESDAY,
                 startTime = "12 PM",
                 endTime = "02 PM"
             ),
@@ -173,17 +173,17 @@ fun TimetableScreen() {
                 id = 8,
                 title = "Web Development",
                 room = "B-101",
-                day = DayOfWeek.MONDAY,
+                day = DayOfWeek.WEDNESDAY,
                 startTime = "02 PM",
                 endTime = "04 PM"
             ),
             TimetableEntry(
                 id = 9,
-                title = "Statistics 2",
-                room = "B-101",
-                day = DayOfWeek.MONDAY,
-                startTime = "04 PM",
-                endTime = "06 PM"
+                title = "App Android Exam :D",
+                room = "A-002",
+                day = DayOfWeek.WEDNESDAY,
+                startTime = "08 PM",
+                endTime = "09 PM"
             ),
             TimetableEntry(
                 id = 10,
@@ -228,8 +228,8 @@ fun TimetableScreen() {
                 containerColor = Color(0xFFA78BFA)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add task",
+                    imageVector = Icons.Default.CoPresent,
+                    contentDescription = "Add lecture",
                     tint = Color.White
                 )
             }
@@ -312,8 +312,8 @@ fun WeekView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSl
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             DayChip(day = "Mon", date = "13", isSelected = false, onClick = {})
-            DayChip(day = "Tue", date = "14", isSelected = true, onClick = {})
-            DayChip(day = "Wed", date = "15", isSelected = false, onClick = {})
+            DayChip(day = "Tue", date = "14", isSelected = false, onClick = {})
+            DayChip(day = "Wed", date = "15", isSelected = true, onClick = {})
             DayChip(day = "Thu", date = "16", isSelected = false, onClick = {})
             DayChip(day = "Fri", date = "17", isSelected = false, onClick = {})
         }
@@ -413,20 +413,24 @@ fun WeekView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSl
 @Composable
 fun DayView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSlotHeight: Dp) {
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(horizontal = 16.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+    ) {
 
         Text(
-            text = "Monday",
+            text = "Wednesday",
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
             // time slots from 8AM - 9 PM ->
             Column(
                 modifier = Modifier.width(50.dp)
@@ -464,7 +468,7 @@ fun DayView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSlo
                 }
                 timetableEntries
                     // Displays only lectures scheduled for the selected day.
-                    .filter { entry -> entry.day == DayOfWeek.MONDAY }
+                    .filter { entry -> entry.day == DayOfWeek.WEDNESDAY }
                     .forEach { entry ->
 
                         val row = mapTimeToRow(entry.startTime, hours)

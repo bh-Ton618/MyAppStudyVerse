@@ -1,7 +1,9 @@
 package com.example.myappstudyverse.ui.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,10 +21,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.FilterList
+import androidx.compose.material.icons.outlined.NoteAlt
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
@@ -44,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -177,8 +181,8 @@ fun NotesScreen() {
                 containerColor = Color(0xFFA78BFA)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add task",
+                    imageVector = Icons.Outlined.NoteAlt,
+                    contentDescription = "Add note",
                     tint = Color.White
                 )
             }
@@ -326,7 +330,7 @@ fun NotesScreen() {
 
 
             // Displays all notes in a scrollable list.
-            // LazyColumn renders only visible items ti improve performance.
+            // LazyColumn renders only visible items to improve performance.
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
 
                 if (isPinnedSectionExpanded) {
@@ -338,7 +342,9 @@ fun NotesScreen() {
                             note = note,
                             onNoteClick = {
                                 // TODO: Navigate to the note detail screen.
-                            }
+                            },
+                            onPinClick = { note.isPinned = false },
+                            onDeleteClick = { notesList.remove(note) }
                         )
                     }
                     item {
@@ -359,8 +365,10 @@ fun NotesScreen() {
                     NoteCard(
                         note = note,
                         onNoteClick = {
-                            // TODO: Navigate to the note detail screen.
-                        }
+                            // TODO: Navigate to note detail screen
+                        },
+                        onPinClick = { note.isPinned = true },
+                        onDeleteClick = { notesList.remove(note) }
                     )
                 }
 
@@ -375,38 +383,110 @@ fun NotesScreen() {
 @Composable
 fun NoteCard(
     note: Note,
-    onNoteClick: () -> Unit
+    onNoteClick: () -> Unit,
+    onPinClick: () -> Unit,
+    onDeleteClick: () -> Unit
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+    var isContextMenuExpanded by remember { mutableStateOf(false) }
 
-            // Displays a pin icon for pinned notes.
-            if (note.isPinned) {
-                Icon(
-                    imageVector = Icons.Default.PushPin,
-                    contentDescription = "Pinned Note",
-                    tint = Color(0xFFA78BFA),
-                    modifier = Modifier
-                        .size(18.dp)
-                        .rotate(20f)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = note.title, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Text(text = note.createdDate, fontSize = 14.sp)
-            }
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = "Open"
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = onNoteClick,
+                onLongClick = {
+                    isContextMenuExpanded = true
+                }
             )
+    ) {
+        Box {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (note.isPinned) {
+                    Icon(
+                        imageVector = Icons.Default.PushPin,
+                        contentDescription = "Pinned Note",
+                        tint = Color(0xFFA78BFA),
+                        modifier = Modifier
+                            .size(18.dp)
+                            .rotate(20f)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+                Column {
+                    Text(
+                        text = note.title,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                    Text(
+                        text = note.createdDate,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+            DropdownMenu(
+                expanded = isContextMenuExpanded,
+                onDismissRequest = {
+                    isContextMenuExpanded = false
+                },
+                offset = DpOffset(
+                    x = (-40).dp,
+                    y = (-120).dp
+                ),
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .clickable {
+                            onPinClick()
+                            isContextMenuExpanded = false
+                        }
+                        .padding(
+                            horizontal = 16.dp,
+                            vertical = 8.dp
+                        ),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PushPin,
+                        contentDescription = null,
+                        tint = Color(0xFFA78BFA),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = if (note.isPinned) "Unpin" else "Pin"
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .clickable {
+                            onDeleteClick()
+                            isContextMenuExpanded = false
+                        }
+                        .padding(
+                            horizontal = 16.dp,
+                            vertical = 8.dp
+                        ),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
+                        tint = Color(0xFFA78BFA),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = "Delete"
+                    )
+                }
+            }
         }
     }
 }
-

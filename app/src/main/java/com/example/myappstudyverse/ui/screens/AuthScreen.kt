@@ -54,6 +54,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.UserProfileChangeRequest
 
 
 // Defines all UI states of the authentication flow displayed within the AuthScreen.
@@ -373,12 +374,21 @@ fun AuthScreen(navController: NavHostController) {
                                 )
                                     .addOnCompleteListener { registration ->
                                         if (registration.isSuccessful) {
-                                            //Sends an email verification link to the newly registered user.
-                                            FirebaseAuth.getInstance().currentUser?.sendEmailVerification()
-                                                ?.addOnCompleteListener { emailSendVerification ->
-                                                    if (emailSendVerification.isSuccessful) {
-                                                        authState = AuthState.VERIFY_SENT
-                                                    }
+                                            // Updates the newly registered user's profile with the entered username.
+                                            // Sends an email verification link to the newly registered user.
+                                            val currentUser = FirebaseAuth.getInstance().currentUser
+                                            val profileUpdate = UserProfileChangeRequest.Builder()
+                                                .setDisplayName(userNameInput.trim()).build()
+
+                                            currentUser?.updateProfile(profileUpdate)
+                                                ?.addOnCompleteListener { profileUpdate ->
+
+                                                    FirebaseAuth.getInstance().currentUser?.sendEmailVerification()
+                                                        ?.addOnCompleteListener { emailSendVerification ->
+                                                            if (emailSendVerification.isSuccessful) {
+                                                                authState = AuthState.VERIFY_SENT
+                                                            }
+                                                        }
                                                 }
                                         } else {
                                             when (registration.exception) {
@@ -743,7 +753,13 @@ fun AuthButton(text: String, onClick: () -> Unit) {
 
 // Displays clickable text links for navigation within the authentication flow.
 @Composable
-fun AuthHyperlink(modifier: Modifier = Modifier, text: String = "", linkText: String, underlined: Boolean = true, onClick: () -> Unit ) {
+fun AuthHyperlink(
+    modifier: Modifier = Modifier,
+    text: String = "",
+    linkText: String,
+    underlined: Boolean = true,
+    onClick: () -> Unit
+) {
 
     val hyperLinkText = buildAnnotatedString {
         append(text)
