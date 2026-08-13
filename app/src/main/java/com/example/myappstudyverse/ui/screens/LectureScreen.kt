@@ -46,10 +46,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
+import androidx.navigation.NavHostController
 import com.example.myappstudyverse.ui.components.AppFilterChip
 
 
-data class TimetableEntry(
+data class Lecture(
     val id: Int,
     val title: String,
     val room: String,
@@ -66,14 +67,14 @@ enum class DayOfWeek {
     FRIDAY
 }
 
-enum class TimetableView {
+enum class LectureView {
     WEEK,
     DAY
 }
 
 
 @Composable
-fun TimetableHeaderArtWork() {
+fun LectureHeaderArtWork() {
     // TODO: Insert artwork here later
 }
 
@@ -104,16 +105,16 @@ private fun formatLectureTime(start: String, end: String): String {
 
 // Main timetable screen providing week and day views of scheduled lectures.
 @Composable
-fun TimetableScreen() {
+fun LectureScreen(navController: NavHostController) {
 
     // Stores the currently selected timetable view.
-    var selectedView by remember { mutableStateOf(TimetableView.WEEK) }
+    var selectedView by remember { mutableStateOf(LectureView.WEEK) }
 
 
     // Sample timetable data used for demonstrating the timetable layout.
-    val timetableEntries = remember {
+    val lectureEntries = remember {
         mutableStateListOf(
-            TimetableEntry(
+            Lecture(
                 id = 1,
                 title = "Mathematics",
                 room = "B-101",
@@ -121,7 +122,7 @@ fun TimetableScreen() {
                 startTime = "08 AM",
                 endTime = "10 AM"
             ),
-            TimetableEntry(
+            Lecture(
                 id = 2,
                 title = "Informatics",
                 room = "AB-100",
@@ -129,7 +130,7 @@ fun TimetableScreen() {
                 startTime = "12 PM",
                 endTime = "02 PM"
             ),
-            TimetableEntry(
+            Lecture(
                 id = 3,
                 title = "App Programming 2.",
                 room = "B-400",
@@ -137,7 +138,7 @@ fun TimetableScreen() {
                 startTime = "08 AM",
                 endTime = "10 AM"
             ),
-            TimetableEntry(
+            Lecture(
                 id = 4,
                 title = "Physics",
                 room = "A-111",
@@ -145,7 +146,7 @@ fun TimetableScreen() {
                 startTime = "02 PM",
                 endTime = "04 PM"
             ),
-            TimetableEntry(
+            Lecture(
                 id = 5,
                 title = "Marketing",
                 room = "B-404",
@@ -153,7 +154,7 @@ fun TimetableScreen() {
                 startTime = "11 AM",
                 endTime = "04 PM"
             ),
-            TimetableEntry(
+            Lecture(
                 id = 6,
                 title = " Immun - Biology",
                 room = "B-101",
@@ -161,7 +162,7 @@ fun TimetableScreen() {
                 startTime = "10 AM",
                 endTime = "12 PM"
             ),
-            TimetableEntry(
+            Lecture(
                 id = 7,
                 title = "Business and Communications",
                 room = "B-101",
@@ -169,7 +170,7 @@ fun TimetableScreen() {
                 startTime = "12 PM",
                 endTime = "02 PM"
             ),
-            TimetableEntry(
+            Lecture(
                 id = 8,
                 title = "Web Development",
                 room = "B-101",
@@ -177,7 +178,7 @@ fun TimetableScreen() {
                 startTime = "02 PM",
                 endTime = "04 PM"
             ),
-            TimetableEntry(
+            Lecture(
                 id = 9,
                 title = "App Android Exam :D",
                 room = "A-002",
@@ -185,7 +186,7 @@ fun TimetableScreen() {
                 startTime = "08 PM",
                 endTime = "09 PM"
             ),
-            TimetableEntry(
+            Lecture(
                 id = 10,
                 title = "IT Security",
                 room = "B-101",
@@ -197,7 +198,7 @@ fun TimetableScreen() {
 
     }
 
-    // Defines the timetable's hourly time slots.
+    // Defines the lecture's hourly time slots.
     val hours = listOf(
         "08 AM",
         "09 AM",
@@ -215,14 +216,14 @@ fun TimetableScreen() {
         "09 PM"
     )
 
-    // Shared height for each timetable slot to keep the timeline, grid and cards aligned.
+    // Shared height for each lecture slot to keep the timeline, grid and cards aligned.
     val hourSlotHeight = 49.dp
 
 
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {},
+                onClick = { navController.navigate("lectureDetail/new") },
                 modifier = Modifier.offset(y = 24.dp),
                 shape = CircleShape,
                 containerColor = Color(0xFFA78BFA)
@@ -247,7 +248,7 @@ fun TimetableScreen() {
                     bottom = innerPadding.calculateBottomPadding()
                 )
         ) {
-            TimetableHeaderArtWork()
+            LectureHeaderArtWork()
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -265,33 +266,35 @@ fun TimetableScreen() {
 
                 AppFilterChip(
                     text = "Week",
-                    isSelected = selectedView == TimetableView.WEEK,
-                    onClick = { selectedView = TimetableView.WEEK }
+                    isSelected = selectedView == LectureView.WEEK,
+                    onClick = { selectedView = LectureView.WEEK }
 
                 )
                 Spacer(modifier = Modifier.width(12.dp))
 
                 AppFilterChip(
                     text = "Day",
-                    isSelected = selectedView == TimetableView.DAY,
-                    onClick = { selectedView = TimetableView.DAY }
+                    isSelected = selectedView == LectureView.DAY,
+                    onClick = { selectedView = LectureView.DAY }
                 )
             }
 
             Spacer(modifier = Modifier.height(18.dp))
 
             // Switch between Composables Week/Day View based on selected Chip ->
-            if (selectedView == TimetableView.WEEK) {
+            if (selectedView == LectureView.WEEK) {
                 WeekView(
-                    timetableEntries = timetableEntries,
+                    lectureEntries = lectureEntries,
                     hours = hours,
-                    hourSlotHeight = hourSlotHeight
+                    hourSlotHeight = hourSlotHeight,
+                    navController = navController
                 )
             } else {
                 DayView(
-                    timetableEntries = timetableEntries,
+                    lectureEntries = lectureEntries,
                     hours = hours,
-                    hourSlotHeight = hourSlotHeight
+                    hourSlotHeight = hourSlotHeight,
+                    navController = navController
                 )
             }
         }
@@ -301,7 +304,12 @@ fun TimetableScreen() {
 
 // Displays the weekly timetable with lectures positioned in a timetable grid.
 @Composable
-fun WeekView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSlotHeight: Dp) {
+fun WeekView(
+    lectureEntries: List<Lecture>,
+    hours: List<String>,
+    hourSlotHeight: Dp,
+    navController: NavHostController
+) {
 
     Column {
         // Displays the weekday selector.
@@ -341,7 +349,7 @@ fun WeekView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSl
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                 }
-                // Draws the timetable grid and places lecture cards at their calculated positions.
+                // Draws the timetable / lecture grid and places lecture cards at their calculated positions.
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -381,13 +389,13 @@ fun WeekView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSl
                         }
 
                     }
-                    timetableEntries.forEach { entry ->
+                    lectureEntries.forEach { lecture ->
 
-                        // Calculates the lecture position within the timetable grid.
-                        val column = mapDayToColumn(entry.day)
-                        val row = mapTimeToRow(entry.startTime, hours)
+                        // Calculates the lecture position within the lecture grid.
+                        val column = mapDayToColumn(lecture.day)
+                        val row = mapTimeToRow(lecture.startTime, hours)
 
-                        val endRow = mapTimeToRow(entry.endTime, hours)
+                        val endRow = mapTimeToRow(lecture.endTime, hours)
                         val duration = endRow - row
                         val lectureHeight = hourSlotHeight * duration
 
@@ -397,7 +405,8 @@ fun WeekView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSl
 
                         LectureCard(
                             modifier = Modifier.offset(x = xOffset, y = yOffset),
-                            entry = entry,
+                            lecture = lecture,
+                            onClick = { navController.navigate("lectureDetail/${lecture.id}") },
                             lectureHeight = lectureHeight
                         )
                     }
@@ -411,7 +420,12 @@ fun WeekView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSl
 
 // Displays the timetable for a single day.
 @Composable
-fun DayView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSlotHeight: Dp) {
+fun DayView(
+    lectureEntries: List<Lecture>,
+    hours: List<String>,
+    hourSlotHeight: Dp,
+    navController: NavHostController
+) {
 
     Column(
         modifier = Modifier
@@ -466,13 +480,13 @@ fun DayView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSlo
                         }
                     }
                 }
-                timetableEntries
+                lectureEntries
                     // Displays only lectures scheduled for the selected day.
-                    .filter { entry -> entry.day == DayOfWeek.WEDNESDAY }
-                    .forEach { entry ->
+                    .filter { lecture -> lecture.day == DayOfWeek.WEDNESDAY }
+                    .forEach { lecture ->
 
-                        val row = mapTimeToRow(entry.startTime, hours)
-                        val endRow = mapTimeToRow(entry.endTime, hours)
+                        val row = mapTimeToRow(lecture.startTime, hours)
+                        val endRow = mapTimeToRow(lecture.endTime, hours)
                         val duration = endRow - row
                         val lectureHeight = hourSlotHeight * duration
 
@@ -480,9 +494,11 @@ fun DayView(timetableEntries: List<TimetableEntry>, hours: List<String>, hourSlo
 
                         LectureCard(
                             modifier = Modifier.offset(y = yOffset),
-                            entry = entry,
+                            lecture = lecture,
                             lectureHeight = lectureHeight,
+                            onClick = { navController.navigate("lectureDetail/${lecture.id}") },
                             isDayView = true
+
                         )
                     }
             }
@@ -523,8 +539,9 @@ fun DayChip(day: String, date: String, isSelected: Boolean, onClick: () -> Unit)
 @Composable
 fun LectureCard(
     modifier: Modifier = Modifier,
-    entry: TimetableEntry,
+    lecture: Lecture,
     lectureHeight: Dp,
+    onClick: () -> Unit,
     isDayView: Boolean = false
 ) {
 
@@ -542,22 +559,23 @@ fun LectureCard(
         modifier = modifier
             .width(cardWidth)
             .height(lectureHeight)
-            .padding(2.dp),
+            .padding(2.dp)
+            .clickable { onClick() },
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(modifier = Modifier.padding(horizontal = 6.dp, vertical = 6.dp)) {
             Text(
-                text = entry.title,
+                text = lecture.title,
                 fontWeight = FontWeight.Bold,
                 fontSize = lectureTitleFontSize,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.height(2.dp))
-            Text(text = entry.room, fontSize = 12.sp)
+            Text(text = lecture.room, fontSize = 12.sp)
             Spacer(modifier = Modifier.height(1.dp))
             Text(
-                text = formatLectureTime(start = entry.startTime, end = entry.endTime),
+                text = formatLectureTime(start = lecture.startTime, end = lecture.endTime),
                 fontSize = 12.sp
             )
         }

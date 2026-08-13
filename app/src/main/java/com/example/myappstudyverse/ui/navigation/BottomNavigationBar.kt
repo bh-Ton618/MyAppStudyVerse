@@ -22,7 +22,7 @@ fun BottomNavigationBar(navController: NavController) {
     val currentNavigationState = navController.currentBackStackEntryAsState()
     val currentScreen = currentNavigationState.value?.destination?.route
 
-    // Privides navigation between the app's primary screens.
+    // Provides navigation between the app's primary screens.
     NavigationBar {
         NavigationBarItem(
             selected = currentScreen == "dashboard",
@@ -49,14 +49,14 @@ fun BottomNavigationBar(navController: NavController) {
             }
         )
         NavigationBarItem(
-            selected = currentScreen == "timetable",
+            selected = currentScreen == "lectures",
             onClick = {
-                navController.navigate("timetable")
+                navController.navigate("lectures")
             },
             icon = {
                 Icon(
                     Icons.Outlined.CalendarMonth,
-                    contentDescription = "Timetable"
+                    contentDescription = "Lectures"
                 )
             }
         )

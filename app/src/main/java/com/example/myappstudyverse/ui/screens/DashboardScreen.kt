@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material.icons.outlined.CoPresent
@@ -98,7 +97,7 @@ fun DashboardScreen(
                                     )
                                     .clickable {
                                         isFabExpanded = false
-                                        // TODO: New Task
+                                        navController.navigate("taskDetail/new?type=${TaskType.TASK}")
                                     }
                                     .padding(horizontal = 14.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically
@@ -126,7 +125,7 @@ fun DashboardScreen(
                                     )
                                     .clickable {
                                         isFabExpanded = false
-                                        // TODO: New Lecture
+                                        navController.navigate("lectureDetail/new")
                                     }
                                     .padding(horizontal = 14.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically
@@ -154,7 +153,7 @@ fun DashboardScreen(
                                     )
                                     .clickable {
                                         isFabExpanded = false
-                                        // TODO: New Exam
+                                        navController.navigate("taskDetail/new?type=${TaskType.EXAM}")
                                     }
                                     .padding(horizontal = 14.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically
@@ -180,33 +179,47 @@ fun DashboardScreen(
 
     { innerPadding ->
 
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
 
-        Column(
-            modifier = modifier
-                .statusBarsPadding()
-                .padding(
-                    start = 24.dp,
-                    end = 24.dp,
-                    top = 24.dp,
-                    bottom = innerPadding.calculateBottomPadding()
+            Column(
+                modifier = modifier
+                    .statusBarsPadding()
+                    .padding(
+                        start = 24.dp,
+                        end = 24.dp,
+                        top = 24.dp,
+                        bottom = innerPadding.calculateBottomPadding()
+                    )
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Top
+            )
+
+            {
+                GreetingSection()
+                Spacer(modifier = Modifier.height(16.dp))
+
+                MotivationSection()
+                Spacer(modifier = Modifier.height(24.dp))
+
+                TodayOverviewSection()
+                Spacer(modifier = Modifier.height(16.dp))
+
+                UpComingSection()
+                Spacer(modifier = Modifier.height(16.dp))
+
+            }
+
+            if (isFabExpanded) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable {
+                            isFabExpanded = false
+                        }
                 )
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Top
-        )
-
-        {
-            GreetingSection()
-            Spacer(modifier = Modifier.height(16.dp))
-
-            MotivationSection()
-            Spacer(modifier = Modifier.height(24.dp))
-
-            TodayOverviewSection()
-            Spacer(modifier = Modifier.height(16.dp))
-
-            UpComingSection()
-            Spacer(modifier = Modifier.height(16.dp))
-
+            }
         }
     }
 }
@@ -440,12 +453,7 @@ fun UpcomingCard(title: String, subtitle: String, icon: String) {
                         color = Color.Gray
                     )
                 }
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = "Open"
-                )
             }
         }
     }
 }
-

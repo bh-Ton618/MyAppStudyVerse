@@ -50,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 
 
 data class Note(
@@ -74,7 +75,7 @@ fun NotesHeaderArtWork() {
 
 // Main notes screen with search, sorting and pinned management.
 @Composable
-fun NotesScreen() {
+fun NotesScreen(navController: NavHostController) {
 
     // Stores the current UI state for searching, sorting and pinned note visibility.
     var isSearchOpen by remember { mutableStateOf(false) }
@@ -146,7 +147,7 @@ fun NotesScreen() {
             )
         )
     }
-    // Sorts notes while always keping pinned notes at the top.
+    // Sorts notes while always keeping pinned notes at the top.
     // TODO: Replace ID sorting with createdTimeStamp after introducing persistent storage.
     val sortedNotesList = when (selectedSortOption) {
         NoteSortOption.NEWEST ->
@@ -175,7 +176,7 @@ fun NotesScreen() {
         // Placeholder button for creating new notes in a future version.
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {},
+                onClick = { navController.navigate("noteDetail/new") },
                 modifier = Modifier.offset(y = 24.dp),
                 shape = CircleShape,
                 containerColor = Color(0xFFA78BFA)
@@ -341,7 +342,7 @@ fun NotesScreen() {
                         NoteCard(
                             note = note,
                             onNoteClick = {
-                                // TODO: Navigate to the note detail screen.
+                                navController.navigate("noteDetail/${note.id}")
                             },
                             onPinClick = { note.isPinned = false },
                             onDeleteClick = { notesList.remove(note) }
@@ -365,7 +366,7 @@ fun NotesScreen() {
                     NoteCard(
                         note = note,
                         onNoteClick = {
-                            // TODO: Navigate to note detail screen
+                            navController.navigate("noteDetail/${note.id}")
                         },
                         onPinClick = { note.isPinned = true },
                         onDeleteClick = { notesList.remove(note) }
