@@ -9,13 +9,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.myappstudyverse.ui.theme.FilterChipSurface
+import com.example.myappstudyverse.ui.theme.PurplePrimary
+import com.example.myappstudyverse.ui.theme.TextPrimary
+import com.example.myappstudyverse.ui.theme.TextSecondary
 
-//Reusable filter chip used for selecting filter and view options.
+// Reusable filter chip used for selecting filter and view options.
 @Composable
 fun AppFilterChip(
     text: String,
@@ -24,11 +26,17 @@ fun AppFilterChip(
 ) {
     Box(
         modifier = Modifier
-            .size(width = 115.dp, height = 40.dp)
-            .clip(RoundedCornerShape(50.dp))
+            .size(
+                width = 115.dp,
+                height = 40.dp
+            )
             .background(
-                if (isSelected) Color(0xFFA78BFA)
-                else Color.LightGray
+                color = if (isSelected) {
+                    PurplePrimary
+                } else {
+                    FilterChipSurface
+                },
+                shape = RoundedCornerShape(50.dp)
             )
             .clickable {
                 onClick()
@@ -38,8 +46,12 @@ fun AppFilterChip(
         Text(
             text = text,
             fontSize = 14.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            color = if (isSelected) {
+                TextPrimary
+            } else {
+                TextSecondary
+            }
         )
-
     }
 }

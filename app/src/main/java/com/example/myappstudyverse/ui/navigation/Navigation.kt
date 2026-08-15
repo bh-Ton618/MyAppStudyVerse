@@ -49,7 +49,7 @@ fun StudyVerseNavigation() {
         NavHost(
             modifier = Modifier.padding(innerPadding),
             navController = navController,
-            startDestination = "dashboard"
+            startDestination = "auth"
         ) {
             composable("auth") {
 

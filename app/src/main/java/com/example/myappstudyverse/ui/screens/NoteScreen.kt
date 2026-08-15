@@ -28,6 +28,7 @@ import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.NoteAlt
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
@@ -56,6 +57,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.myappstudyverse.data.local.DatabaseProvider
 import com.example.myappstudyverse.data.local.NoteRepository
+import com.example.myappstudyverse.ui.theme.SpaceSurface
+import com.example.myappstudyverse.ui.theme.TextPrimary
+import com.example.myappstudyverse.ui.theme.TextSecondary
 import com.example.myappstudyverse.ui.viewmodel.NoteViewModel
 import com.example.myappstudyverse.ui.viewmodel.NoteViewModelFactory
 
@@ -179,7 +183,8 @@ fun NoteScreen(navController: NavHostController) {
                 Text(
                     text = "My Notes",
                     fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(
@@ -377,7 +382,8 @@ fun NoteCard(
                 onLongClick = {
                     isContextMenuExpanded = true
                 }
-            )
+            ),
+        colors = CardDefaults.cardColors(containerColor = SpaceSurface)
     ) {
         Box {
             Row(
@@ -401,11 +407,13 @@ fun NoteCard(
                     Text(
                         text = note.title,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                        fontSize = 18.sp,
+                        color = TextPrimary
                     )
                     Text(
                         text = note.createdDate.toString(),
-                        fontSize = 14.sp
+                        fontSize = 14.sp,
+                        color = TextSecondary
                     )
                 }
             }

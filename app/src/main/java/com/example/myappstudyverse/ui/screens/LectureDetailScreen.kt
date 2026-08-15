@@ -56,6 +56,12 @@ import androidx.navigation.NavHostController
 import com.example.myappstudyverse.data.local.DatabaseProvider
 import com.example.myappstudyverse.data.local.LectureRepository
 import com.example.myappstudyverse.ui.components.AppFilterChip
+import com.example.myappstudyverse.ui.theme.InputFieldBackground
+import com.example.myappstudyverse.ui.theme.InputFieldBorder
+import com.example.myappstudyverse.ui.theme.PurpleSecondary
+import com.example.myappstudyverse.ui.theme.SpaceSurface
+import com.example.myappstudyverse.ui.theme.TextPrimary
+import com.example.myappstudyverse.ui.theme.TextSecondary
 import com.example.myappstudyverse.ui.viewmodel.LectureViewModel
 import com.example.myappstudyverse.ui.viewmodel.LectureViewModelFactory
 
@@ -314,13 +320,13 @@ fun LectureDetailScreen(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFEDE9FE)),
+                        .background(InputFieldBackground),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.CoPresent,
                         contentDescription = null,
-                        tint = Color(0xFFA78BFA),
+                        tint = PurpleSecondary,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -333,7 +339,7 @@ fun LectureDetailScreen(
                         "LECTURE",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFA78BFA)
+                    color = PurpleSecondary
                 )
             }
             Spacer(modifier = Modifier.height(18.dp))
@@ -341,7 +347,8 @@ fun LectureDetailScreen(
             Text(
                 text = "Lecture Title *",
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = TextSecondary
             )
             Spacer(modifier = Modifier.height(6.dp))
 
@@ -357,7 +364,8 @@ fun LectureDetailScreen(
             Text(
                 text = "Day *",
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = TextSecondary
             )
             Spacer(modifier = Modifier.height(6.dp))
 
@@ -408,7 +416,8 @@ fun LectureDetailScreen(
             Text(
                 text = "Room",
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = TextSecondary
             )
             Spacer(modifier = Modifier.height(6.dp))
 
@@ -433,7 +442,8 @@ fun LectureDetailScreen(
                     Text(
                         text = "Start Time *",
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = TextSecondary
                     )
                     Spacer(modifier = Modifier.height(6.dp))
 
@@ -444,7 +454,7 @@ fun LectureDetailScreen(
                                 .height(56.dp)
                                 .border(
                                     width = 1.dp,
-                                    color = Color.LightGray,
+                                    color = InputFieldBorder,
                                     shape = RoundedCornerShape(18.dp)
                                 )
                                 .clip(RoundedCornerShape(18.dp))
@@ -469,7 +479,8 @@ fun LectureDetailScreen(
                             offset = DpOffset(
                                 x = 33.dp,
                                 y = (-15).dp
-                            )
+                            ),
+                            containerColor = SpaceSurface
                         ) {
                             Column(
                                 modifier = Modifier
@@ -520,7 +531,8 @@ fun LectureDetailScreen(
                     Text(
                         text = "End Time *",
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = TextSecondary
                     )
                     Spacer(modifier = Modifier.height(6.dp))
 
@@ -531,7 +543,7 @@ fun LectureDetailScreen(
                                 .height(56.dp)
                                 .border(
                                     width = 1.dp,
-                                    color = Color.LightGray,
+                                    color = InputFieldBorder,
                                     shape = RoundedCornerShape(18.dp)
                                 )
                                 .clip(RoundedCornerShape(18.dp))
@@ -557,7 +569,8 @@ fun LectureDetailScreen(
                             offset = DpOffset(
                                 x = 33.dp,
                                 y = (-15).dp
-                            )
+                            ),
+                            containerColor = SpaceSurface
                         ) {
                             Column(
                                 modifier = Modifier
@@ -586,7 +599,8 @@ fun LectureDetailScreen(
             Text(
                 text = "Lecturer",
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = TextSecondary
             )
             Spacer(modifier = Modifier.height(6.dp))
 
@@ -616,7 +630,7 @@ private fun BasicLectureTextField(
             .height(56.dp)
             .border(
                 width = 1.dp,
-                color = Color.LightGray,
+                color = InputFieldBorder,
                 shape = RoundedCornerShape(18.dp)
             )
             .padding(
@@ -624,7 +638,8 @@ private fun BasicLectureTextField(
                 vertical = 16.dp
             ),
         textStyle = LocalTextStyle.current.copy(
-            fontSize = 16.sp
+            fontSize = 16.sp,
+            color = TextPrimary
         ),
         singleLine = true,
         decorationBox = { innerTextField ->
@@ -633,7 +648,7 @@ private fun BasicLectureTextField(
                     Text(
                         text = placeholder,
                         fontSize = 16.sp,
-                        color = Color.LightGray
+                        color = TextSecondary
                     )
                 }
 

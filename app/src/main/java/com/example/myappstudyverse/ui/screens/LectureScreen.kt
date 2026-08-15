@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CoPresent
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
@@ -59,6 +60,10 @@ import androidx.navigation.NavHostController
 import com.example.myappstudyverse.data.local.DatabaseProvider
 import com.example.myappstudyverse.data.local.LectureRepository
 import com.example.myappstudyverse.ui.components.AppFilterChip
+import com.example.myappstudyverse.ui.theme.FilterChipSurface
+import com.example.myappstudyverse.ui.theme.GridLine
+import com.example.myappstudyverse.ui.theme.LectureCardSurface
+import com.example.myappstudyverse.ui.theme.TextSecondary
 import com.example.myappstudyverse.ui.viewmodel.LectureViewModel
 import com.example.myappstudyverse.ui.viewmodel.LectureViewModelFactory
 import java.time.LocalDate
@@ -271,7 +276,8 @@ fun LectureScreen(navController: NavHostController) {
 
             Text(
                 text = "Timetable", fontSize = 32.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = TextSecondary
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -408,10 +414,7 @@ fun WeekView(
                             text = hour,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = if (hour.contains(":30"))
-                                Color.LightGray
-                            else
-                                Color.Unspecified
+                            color = TextSecondary
                         )
                         Spacer(modifier = Modifier.height(0.dp))
                     }
@@ -428,9 +431,9 @@ fun WeekView(
                             HorizontalDivider(
                                 thickness = 1.dp,
                                 color = if (hour.contains(":30"))
-                                    Color.LightGray.copy(alpha = 0.5f)
+                                    GridLine.copy(alpha = 0.5f)
                                 else
-                                    MaterialTheme.colorScheme.outlineVariant
+                                    GridLine
                             )
                             Spacer(modifier = Modifier.height(23.5.dp))
                         }
@@ -451,7 +454,7 @@ fun WeekView(
                                             .align(Alignment.CenterEnd)
                                             .fillMaxHeight(),
                                         thickness = 1.dp,
-                                        color = MaterialTheme.colorScheme.outlineVariant
+                                        color = GridLine
                                     )
 
                                 }
@@ -607,7 +610,7 @@ fun DayChip(day: String, date: String, isSelected: Boolean, onClick: () -> Unit)
         modifier = Modifier
             .size(width = 42.dp, height = 64.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(if (isSelected) Color(0xFFA78BFA) else Color.Transparent)
+            .background( if (isSelected) FilterChipSurface else Color.Transparent)
             .clickable { onClick() }, contentAlignment = Alignment.Center
     )
     {
@@ -662,7 +665,8 @@ fun LectureCard(
                     isContextMenuExpanded = true
                 }
             ),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = LectureCardSurface)
     ) {
         Column(modifier = Modifier.padding(horizontal = 6.dp, vertical = 6.dp)) {
             Text(

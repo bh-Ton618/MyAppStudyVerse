@@ -52,6 +52,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.myappstudyverse.data.local.DatabaseProvider
 import com.example.myappstudyverse.data.local.NoteRepository
+import com.example.myappstudyverse.ui.theme.TextPrimary
 import com.example.myappstudyverse.ui.viewmodel.NoteViewModel
 import com.example.myappstudyverse.ui.viewmodel.NoteViewModelFactory
 import kotlinx.coroutines.launch
@@ -182,11 +183,11 @@ fun NoteDetailScreen(navController: NavHostController, noteId: Int?) {
                         Icon(
                             imageVector = Icons.Outlined.Delete,
                             contentDescription = "Delete",
-                            tint = Color.White
+                            tint = TextPrimary
                         )
                         Text(
                             text = "Delete",
-                            color = Color.White
+                            color = TextPrimary
                         )
                     }
 

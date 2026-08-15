@@ -9,9 +9,14 @@ import androidx.compose.material.icons.outlined.NoteAlt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.myappstudyverse.ui.theme.PurplePrimary
+import com.example.myappstudyverse.ui.theme.SpaceBackground
+import com.example.myappstudyverse.ui.theme.TextSecondary
 
 
 // Displays the bottom navigation bar for switching between the main application screens.
@@ -23,7 +28,11 @@ fun BottomNavigationBar(navController: NavController) {
     val currentScreen = currentNavigationState.value?.destination?.route
 
     // Provides navigation between the app's primary screens.
-    NavigationBar {
+    NavigationBar(
+        containerColor = SpaceBackground,
+        tonalElevation = 0.dp
+    ) {
+
         NavigationBarItem(
             selected = currentScreen == "dashboard",
             onClick = {
@@ -34,8 +43,14 @@ fun BottomNavigationBar(navController: NavController) {
                     Icons.Outlined.Home,
                     contentDescription = "Home"
                 )
-            }
+            },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = PurplePrimary,
+                unselectedIconColor = TextSecondary,
+                indicatorColor = SpaceBackground
+            )
         )
+
         NavigationBarItem(
             selected = currentScreen == "tasks",
             onClick = {
@@ -46,8 +61,14 @@ fun BottomNavigationBar(navController: NavController) {
                     Icons.Outlined.AssignmentTurnedIn,
                     contentDescription = "Tasks"
                 )
-            }
+            },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = PurplePrimary,
+                unselectedIconColor = TextSecondary,
+                indicatorColor = SpaceBackground
+            )
         )
+
         NavigationBarItem(
             selected = currentScreen == "lectures",
             onClick = {
@@ -58,8 +79,14 @@ fun BottomNavigationBar(navController: NavController) {
                     Icons.Outlined.CalendarMonth,
                     contentDescription = "Lectures"
                 )
-            }
+            },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = PurplePrimary,
+                unselectedIconColor = TextSecondary,
+                indicatorColor = SpaceBackground
+            )
         )
+
         NavigationBarItem(
             selected = currentScreen == "notes",
             onClick = {
@@ -70,8 +97,14 @@ fun BottomNavigationBar(navController: NavController) {
                     Icons.Outlined.NoteAlt,
                     contentDescription = "Notes"
                 )
-            }
+            },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = PurplePrimary,
+                unselectedIconColor = TextSecondary,
+                indicatorColor = SpaceBackground
+            )
         )
+
         NavigationBarItem(
             selected = currentScreen == "space",
             onClick = {
@@ -82,7 +115,12 @@ fun BottomNavigationBar(navController: NavController) {
                     Icons.Outlined.AutoAwesome,
                     contentDescription = "Space"
                 )
-            }
+            },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = PurplePrimary,
+                unselectedIconColor = TextSecondary,
+                indicatorColor = SpaceBackground
+            )
         )
     }
 }

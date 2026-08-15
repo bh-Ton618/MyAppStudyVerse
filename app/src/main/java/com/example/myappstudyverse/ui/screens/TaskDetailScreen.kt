@@ -54,6 +54,11 @@ import androidx.navigation.NavHostController
 import com.example.myappstudyverse.data.local.DatabaseProvider
 import com.example.myappstudyverse.data.local.TaskRepository
 import com.example.myappstudyverse.ui.components.AppFilterChip
+import com.example.myappstudyverse.ui.theme.InputFieldBackground
+import com.example.myappstudyverse.ui.theme.InputFieldBorder
+import com.example.myappstudyverse.ui.theme.InputFieldText
+import com.example.myappstudyverse.ui.theme.TextLabel
+import com.example.myappstudyverse.ui.theme.TextPrimary
 import com.example.myappstudyverse.ui.viewmodel.TaskViewModel
 import com.example.myappstudyverse.ui.viewmodel.TaskViewModelFactory
 import kotlinx.coroutines.launch
@@ -64,6 +69,16 @@ fun TaskDetailScreen(
     taskId: Int?,
     taskType: TaskType?
 ) {
+
+    // Design colors used specifically in this screen.
+    // The accent matches the currently selected AppFilterChip.
+    val accentColor = Color(0xFFA78BFA)
+
+    // Dark, subtle background for the icon container.
+    val iconSurfaceColor = Color(0xFF26203F)
+
+    // Slightly muted text color for placeholders.
+    val placeholderColor = Color(0xFFB8BCD0)
 
     var taskTitle by remember { mutableStateOf("") }
     var taskDescription by remember { mutableStateOf("") }
@@ -137,18 +152,18 @@ fun TaskDetailScreen(
                             .offset(y = 80.dp)
                             .border(
                                 width = 0.5.dp,
-                                color = Color(0xFF7C4DFF),
+                                color = accentColor,
                                 shape = RoundedCornerShape(14.dp)
                             )
                             .background(
-                                color = Color.White,
+                                color = iconSurfaceColor,
                                 shape = RoundedCornerShape(14.dp)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = snackbarData.visuals.message,
-                            color = Color(0xFF7C4DFF)
+                            color = accentColor
                         )
                     }
                 }
@@ -176,13 +191,13 @@ fun TaskDetailScreen(
                             .clip(RoundedCornerShape(50.dp))
                             .background(
                                 if (isTaskDone)
-                                    Color(0xFFA78BFA)
+                                    accentColor
                                 else
                                     Color.Transparent
                             )
                             .border(
                                 width = 1.dp,
-                                color = Color(0xFFA78BFA),
+                                color = accentColor,
                                 shape = RoundedCornerShape(50.dp)
                             )
                             .clickable {
@@ -206,9 +221,10 @@ fun TaskDetailScreen(
                             color = if (isTaskDone)
                                 Color.White
                             else
-                                Color(0xFFA78BFA)
+                                accentColor
                         )
                     }
+
                     Spacer(modifier = Modifier.size(12.dp))
 
                     Row(
@@ -238,19 +254,22 @@ fun TaskDetailScreen(
                             Icon(
                                 imageVector = Icons.Outlined.Delete,
                                 contentDescription = "Delete",
-                                tint = Color.White
+                                tint = TextPrimary
                             )
+
                             Text(
                                 text = "Delete",
-                                color = Color.White
+                                color = TextPrimary
                             )
                         }
+
                         Box(
                             modifier = Modifier
                                 .width(1.dp)
                                 .height(22.dp)
                                 .background(Color.White.copy(alpha = 0.5f))
                         )
+
                         TextButton(
                             onClick = {
 
@@ -299,6 +318,7 @@ fun TaskDetailScreen(
                                         navController.popBackStack()
                                     } else {
                                         taskViewModel.updateTask(task)
+
                                         coroutineScope.launch {
                                             snackbarHostState.showSnackbar("Saved")
                                         }
@@ -309,11 +329,12 @@ fun TaskDetailScreen(
                             Icon(
                                 imageVector = Icons.Outlined.Check,
                                 contentDescription = "Save",
-                                tint = Color.White
+                                tint = TextPrimary
                             )
+
                             Text(
                                 text = "Save",
-                                color = Color.White
+                                color = TextPrimary
                             )
                         }
                     }
@@ -333,6 +354,7 @@ fun TaskDetailScreen(
                     bottom = innerPadding.calculateBottomPadding()
                 )
         ) {
+
             IconButton(
                 onClick = {
                     if (isNew) {
@@ -414,6 +436,7 @@ fun TaskDetailScreen(
                             }
                         }
                     }
+
                     navController.popBackStack()
                 },
                 modifier = Modifier.offset(x = (-12).dp)
@@ -423,11 +446,13 @@ fun TaskDetailScreen(
                     contentDescription = "Back"
                 )
             }
+
             Spacer(
                 modifier = Modifier.height(
                     if (isExam) 4.dp else 18.dp
                 )
             )
+
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -435,7 +460,12 @@ fun TaskDetailScreen(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFEDE9FE)),
+                        .background(iconSurfaceColor)
+                        .border(
+                            width = 1.dp,
+                            color = accentColor.copy(alpha = 0.55f),
+                            shape = RoundedCornerShape(12.dp)
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -444,10 +474,11 @@ fun TaskDetailScreen(
                         else
                             Icons.Outlined.TaskAlt,
                         contentDescription = null,
-                        tint = Color(0xFFA78BFA),
+                        tint = accentColor,
                         modifier = Modifier.size(24.dp)
                     )
                 }
+
                 Spacer(modifier = Modifier.width(10.dp))
 
                 Text(
@@ -459,22 +490,26 @@ fun TaskDetailScreen(
                     },
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFA78BFA)
+                    color = accentColor
                 )
             }
+
             Spacer(
                 modifier = Modifier.height(
                     if (isExam) 12.dp else 18.dp
                 )
             )
+
             Text(
                 text = if (isExam)
                     "Exam Title *"
                 else
                     "Task Title *",
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = TextLabel
             )
+
             Spacer(modifier = Modifier.height(6.dp))
 
             BasicTextField(
@@ -485,9 +520,17 @@ fun TaskDetailScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
+                    .background(
+                        color = InputFieldBackground,
+                        shape = RoundedCornerShape(18.dp)
+                    )
+                    .background(
+                        color = InputFieldBackground,
+                        shape = RoundedCornerShape(18.dp)
+                    )
                     .border(
-                        width = 1.dp,
-                        color = Color.LightGray,
+                        width = 0.5.dp,
+                        color = InputFieldBorder,
                         shape = RoundedCornerShape(18.dp)
                     )
                     .padding(
@@ -495,7 +538,8 @@ fun TaskDetailScreen(
                         vertical = 16.dp
                     ),
                 textStyle = LocalTextStyle.current.copy(
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    color = InputFieldText
                 ),
                 singleLine = true,
                 decorationBox = { innerTextField ->
@@ -507,7 +551,7 @@ fun TaskDetailScreen(
                                 else
                                     "Enter Task Title",
                                 fontSize = 16.sp,
-                                color = Color.LightGray
+                                color = placeholderColor
                             )
                         }
 
@@ -515,16 +559,20 @@ fun TaskDetailScreen(
                     }
                 }
             )
+
             Spacer(
                 modifier = Modifier.height(
                     if (isExam) 16.dp else 24.dp
                 )
             )
+
             Text(
                 text = "Description",
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = TextLabel
             )
+
             Spacer(modifier = Modifier.height(6.dp))
 
             BasicTextField(
@@ -535,9 +583,13 @@ fun TaskDetailScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)
+                    .background(
+                        color = InputFieldBackground,
+                        shape = RoundedCornerShape(18.dp)
+                    )
                     .border(
-                        width = 1.dp,
-                        color = Color.LightGray,
+                        width = 0.5.dp,
+                        color = InputFieldBorder,
                         shape = RoundedCornerShape(18.dp)
                     )
                     .padding(
@@ -545,7 +597,8 @@ fun TaskDetailScreen(
                         vertical = 16.dp
                     ),
                 textStyle = LocalTextStyle.current.copy(
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    color = InputFieldText
                 ),
                 decorationBox = { innerTextField ->
                     Box {
@@ -553,7 +606,7 @@ fun TaskDetailScreen(
                             Text(
                                 text = "Enter Description",
                                 fontSize = 16.sp,
-                                color = Color.LightGray
+                                color = placeholderColor
                             )
                         }
 
@@ -561,19 +614,23 @@ fun TaskDetailScreen(
                     }
                 }
             )
+
             Spacer(
                 modifier = Modifier.height(
                     if (isExam) 16.dp else 24.dp
                 )
             )
+
             Text(
                 text = if (isExam)
                     "Exam Date *"
                 else
                     "Due Date",
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = TextLabel
             )
+
             Spacer(modifier = Modifier.height(6.dp))
 
             BasicTextField(
@@ -584,9 +641,13 @@ fun TaskDetailScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
+                    .background(
+                        color = InputFieldBackground,
+                        shape = RoundedCornerShape(18.dp)
+                    )
                     .border(
-                        width = 1.dp,
-                        color = Color.LightGray,
+                        width = 0.5.dp,
+                        color = InputFieldBorder,
                         shape = RoundedCornerShape(18.dp)
                     )
                     .padding(
@@ -594,7 +655,8 @@ fun TaskDetailScreen(
                         vertical = 16.dp
                     ),
                 textStyle = LocalTextStyle.current.copy(
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    color = InputFieldText
                 ),
                 decorationBox = { innerTextField ->
                     Box {
@@ -605,7 +667,7 @@ fun TaskDetailScreen(
                                 else
                                     "Enter Due Date (DD.MM.YYYY)",
                                 fontSize = 16.sp,
-                                color = Color.LightGray
+                                color = placeholderColor
                             )
                         }
 
@@ -615,13 +677,16 @@ fun TaskDetailScreen(
             )
 
             if (isExam) {
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
                     text = "Professor",
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = TextLabel
                 )
+
                 Spacer(modifier = Modifier.height(6.dp))
 
                 BasicTextField(
@@ -632,9 +697,13 @@ fun TaskDetailScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
+                        .background(
+                            color = InputFieldBackground,
+                            shape = RoundedCornerShape(18.dp)
+                        )
                         .border(
-                            width = 1.dp,
-                            color = Color.LightGray,
+                            width = 0.5.dp,
+                            color = InputFieldBorder,
                             shape = RoundedCornerShape(18.dp)
                         )
                         .padding(
@@ -642,7 +711,8 @@ fun TaskDetailScreen(
                             vertical = 16.dp
                         ),
                     textStyle = LocalTextStyle.current.copy(
-                        fontSize = 16.sp
+                        fontSize = 16.sp,
+                        color = InputFieldText
                     ),
                     singleLine = true,
                     decorationBox = { innerTextField ->
@@ -651,7 +721,7 @@ fun TaskDetailScreen(
                                 Text(
                                     text = "Enter Professor",
                                     fontSize = 16.sp,
-                                    color = Color.LightGray
+                                    color = placeholderColor
                                 )
                             }
 
@@ -659,13 +729,16 @@ fun TaskDetailScreen(
                         }
                     }
                 )
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
                     text = "Exam Type",
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = TextLabel
                 )
+
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Row(
@@ -678,6 +751,7 @@ fun TaskDetailScreen(
                             selectedExamType = ExamType.WRITTEN
                         }
                     )
+
                     AppFilterChip(
                         text = "Oral",
                         isSelected = selectedExamType == ExamType.ORAL,
@@ -686,22 +760,27 @@ fun TaskDetailScreen(
                         }
                     )
                 }
+
                 Spacer(modifier = Modifier.height(8.dp))
 
             } else {
 
                 Spacer(modifier = Modifier.height(28.dp))
             }
+
             Text(
                 text = "Priority",
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = TextLabel
             )
+
             Spacer(
                 modifier = Modifier.height(
                     if (isExam) 8.dp else 16.dp
                 )
             )
+
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -712,6 +791,7 @@ fun TaskDetailScreen(
                         selectedPriority = Priority.LOW
                     }
                 )
+
                 AppFilterChip(
                     text = "Medium",
                     isSelected = selectedPriority == Priority.MEDIUM,
@@ -719,6 +799,7 @@ fun TaskDetailScreen(
                         selectedPriority = Priority.MEDIUM
                     }
                 )
+
                 AppFilterChip(
                     text = "High",
                     isSelected = selectedPriority == Priority.HIGH,
@@ -727,48 +808,25 @@ fun TaskDetailScreen(
                     }
                 )
             }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = "No Priority",
                 fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
+                color = TextLabel
             )
+
             Spacer(modifier = Modifier.height(6.dp))
 
-            Box(
-                modifier = Modifier
-                    .size(
-                        width = 115.dp,
-                        height = 40.dp
-                    )
-                    .clip(RoundedCornerShape(50.dp))
-                    .border(
-                        width = 1.dp,
-                        color = Color(0xFFA78BFA),
-                        shape = RoundedCornerShape(50.dp)
-                    )
-                    .background(
-                        if (selectedPriority == null)
-                            Color(0xFFA78BFA)
-                        else
-                            Color.White
-                    )
-                    .clickable {
-                        selectedPriority = null
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "None",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = if (selectedPriority == null)
-                        Color.White
-                    else
-                        Color.DarkGray
-                )
-            }
+            AppFilterChip(
+                text = "None",
+                isSelected = selectedPriority == null,
+                onClick = {
+                    selectedPriority = null
+                }
+            )
         }
     }
 }

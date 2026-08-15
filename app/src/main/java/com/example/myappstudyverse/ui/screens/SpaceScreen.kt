@@ -51,6 +51,8 @@ import coil3.compose.AsyncImage
 import com.example.myappstudyverse.BuildConfig
 import com.example.myappstudyverse.model.ApodResponse
 import com.example.myappstudyverse.network.RetrofitInstance
+import com.example.myappstudyverse.ui.theme.TextPrimary
+import com.example.myappstudyverse.ui.theme.TextSecondary
 import retrofit2.HttpException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -242,6 +244,7 @@ fun SpaceScreen(navController: NavHostController) {
                     text = loadedApodResponse.title,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
+                    color = TextPrimary,
                     maxLines = 2
                 )
                 Spacer(modifier = Modifier.height(6.dp))
@@ -258,7 +261,7 @@ fun SpaceScreen(navController: NavHostController) {
                 Spacer(modifier = Modifier.height(12.dp))
                 HorizontalDivider(thickness = 1.dp, color = Color.LightGray.copy(alpha = 0.5f))
                 Spacer(modifier = Modifier.height(20.dp))
-                Text(text = formattedExplanation)
+                Text(text = formattedExplanation, color = TextSecondary)
 
                 Spacer(modifier = Modifier.height(28.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {

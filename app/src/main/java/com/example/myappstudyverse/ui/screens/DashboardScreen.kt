@@ -24,6 +24,7 @@ import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material.icons.outlined.CoPresent
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -40,7 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,6 +49,11 @@ import androidx.navigation.NavController
 import com.example.myappstudyverse.data.local.DatabaseProvider
 import com.example.myappstudyverse.data.local.LectureRepository
 import com.example.myappstudyverse.data.local.TaskRepository
+import com.example.myappstudyverse.ui.theme.PurplePrimary
+import com.example.myappstudyverse.ui.theme.SpaceInput
+import com.example.myappstudyverse.ui.theme.SpaceSurface
+import com.example.myappstudyverse.ui.theme.TextPrimary
+import com.example.myappstudyverse.ui.theme.TextSecondary
 import com.example.myappstudyverse.ui.viewmodel.LectureViewModel
 import com.example.myappstudyverse.ui.viewmodel.LectureViewModelFactory
 import com.example.myappstudyverse.ui.viewmodel.TaskViewModel
@@ -59,7 +64,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
 
-//Main dashboard screen providing quick access to app's core features.
+// Main dashboard screen providing quick access to app's core features.
 @Composable
 fun DashboardScreen(
     navController: NavController,
@@ -67,7 +72,7 @@ fun DashboardScreen(
 ) {
     var isFabExpanded by remember { mutableStateOf(false) }
 
-    val context = LocalContext.current
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     val taskRepository = remember {
         TaskRepository(
@@ -93,8 +98,6 @@ fun DashboardScreen(
         factory = LectureViewModelFactory(lectureRepository)
     )
 
-
-
     LaunchedEffect(Unit) {
         taskViewModel.loadTasks()
         lectureViewModel.loadLectures()
@@ -117,14 +120,15 @@ fun DashboardScreen(
                         .offset(y = 28.dp)
                         .alpha(if (isFabExpanded) 0f else 1f),
                     shape = CircleShape,
-                    containerColor = Color(0xFFA78BFA)
+                    containerColor = PurplePrimary
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add",
-                        tint = Color.White
+                        tint = TextPrimary
                     )
                 }
+
                 Box(
                     contentAlignment = Alignment.BottomEnd
                 ) {
@@ -137,10 +141,10 @@ fun DashboardScreen(
                             Row(
                                 modifier = Modifier
                                     .clip(CircleShape)
-                                    .background(Color.White)
+                                    .background(SpaceInput)
                                     .border(
                                         width = 1.dp,
-                                        color = Color(0xFFA78BFA),
+                                        color = PurplePrimary,
                                         shape = RoundedCornerShape(50.dp)
                                     )
                                     .clickable {
@@ -153,22 +157,24 @@ fun DashboardScreen(
                                 Icon(
                                     imageVector = Icons.Outlined.CheckBox,
                                     contentDescription = null,
-                                    tint = Color(0xFFA78BFA),
+                                    tint = PurplePrimary,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "New Task",
-                                    fontWeight = FontWeight.Medium
+                                    fontWeight = FontWeight.Medium,
+                                    color = TextPrimary
                                 )
                             }
+
                             Row(
                                 modifier = Modifier
                                     .clip(CircleShape)
-                                    .background(Color.White)
+                                    .background(SpaceInput)
                                     .border(
                                         width = 1.dp,
-                                        color = Color(0xFFA78BFA),
+                                        color = PurplePrimary,
                                         shape = RoundedCornerShape(50.dp)
                                     )
                                     .clickable {
@@ -181,22 +187,24 @@ fun DashboardScreen(
                                 Icon(
                                     imageVector = Icons.Outlined.CoPresent,
                                     contentDescription = null,
-                                    tint = Color(0xFFA78BFA),
+                                    tint = PurplePrimary,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "New Lecture",
-                                    fontWeight = FontWeight.Medium
+                                    fontWeight = FontWeight.Medium,
+                                    color = TextPrimary
                                 )
                             }
+
                             Row(
                                 modifier = Modifier
                                     .clip(CircleShape)
-                                    .background(Color.White)
+                                    .background(SpaceInput)
                                     .border(
                                         width = 1.dp,
-                                        color = Color(0xFFA78BFA),
+                                        color = PurplePrimary,
                                         shape = RoundedCornerShape(50.dp)
                                     )
                                     .clickable {
@@ -209,22 +217,24 @@ fun DashboardScreen(
                                 Icon(
                                     imageVector = Icons.Outlined.EditNote,
                                     contentDescription = null,
-                                    tint = Color(0xFFA78BFA),
+                                    tint = PurplePrimary,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "New Exam",
-                                    fontWeight = FontWeight.Medium
+                                    fontWeight = FontWeight.Medium,
+                                    color = TextPrimary
                                 )
                             }
+
                             Row(
                                 modifier = Modifier
                                     .clip(CircleShape)
-                                    .background(Color.White)
+                                    .background(SpaceInput)
                                     .border(
                                         width = 1.dp,
-                                        color = Color(0xFFA78BFA),
+                                        color = PurplePrimary,
                                         shape = RoundedCornerShape(50.dp)
                                     )
                                     .clickable {
@@ -237,13 +247,14 @@ fun DashboardScreen(
                                 Icon(
                                     imageVector = Icons.Outlined.EditNote,
                                     contentDescription = null,
-                                    tint = Color(0xFFA78BFA),
+                                    tint = PurplePrimary,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "New Note",
-                                    fontWeight = FontWeight.Medium
+                                    fontWeight = FontWeight.Medium,
+                                    color = TextPrimary
                                 )
                             }
                         }
@@ -271,7 +282,6 @@ fun DashboardScreen(
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.Top
             )
-
             {
                 GreetingSection()
                 Spacer(modifier = Modifier.height(16.dp))
@@ -284,7 +294,6 @@ fun DashboardScreen(
 
                 UpComingSection(tasks = tasks, lectures = lectures)
                 Spacer(modifier = Modifier.height(16.dp))
-
             }
 
             if (isFabExpanded) {
@@ -300,6 +309,7 @@ fun DashboardScreen(
     }
 }
 
+
 // Displays a personalized greeting and profile shortcut.
 @Composable
 fun GreetingSection() {
@@ -314,24 +324,31 @@ fun GreetingSection() {
                 Text(
                     text = "Welcome back, $username \uD83D\uDC4B"
                 )
+
                 val currentDate = LocalDate.now()
-                val formattedDate = currentDate.format(DateTimeFormatter.ofPattern("EEEE, MMMM d"))
+                val formattedDate =
+                    currentDate.format(DateTimeFormatter.ofPattern("EEEE, MMMM d"))
+
                 Text(
                     text = formattedDate
                 )
             }
+
             Box(
                 modifier = Modifier
                     .size(40.dp)
                     .clickable {
-                        //TODO: Navigate to profile.
+                        // TODO: Navigate to profile.
                     }
                     .clip(CircleShape)
-                    .background(Color.Gray),
-                contentAlignment = Alignment.Center) {
-                Text(username.first().uppercase())
+                    .background(SpaceInput),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = username.first().uppercase(),
+                    color = TextPrimary
+                )
             }
-
         }
     }
 }
@@ -340,7 +357,6 @@ fun GreetingSection() {
 // Displays a daily motivational quote to encourage the user.
 @Composable
 fun MotivationSection(modifier: Modifier = Modifier) {
-
 
     val motivationalQuotes = listOf(
         "Shoot for the moon. Even if you miss, you'll land among the stars.",
@@ -354,16 +370,18 @@ fun MotivationSection(modifier: Modifier = Modifier) {
         "Keep looking up. The sky is never the limit.",
         "Great discoveries begin with the courage to launch."
     )
+
     val currentDay = LocalDate.now().dayOfYear
     val dailyQuote = motivationalQuotes[currentDay % motivationalQuotes.size]
-
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(170.dp)
+            .height(170.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = SpaceSurface
+        )
     ) {
-
         Row(
             modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically
@@ -374,14 +392,12 @@ fun MotivationSection(modifier: Modifier = Modifier) {
                     .padding(16.dp),
                 horizontalAlignment = Alignment.Start
             ) {
-
                 Text(
                     text = "Daily Motivation",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFA78BFA)
+                    color = PurplePrimary
                 )
-
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -389,10 +405,9 @@ fun MotivationSection(modifier: Modifier = Modifier) {
                     text = dailyQuote,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
-                    //color = Color.White
                 )
-
             }
+
             Box(
                 modifier = Modifier
                     .size(80.dp)
@@ -407,8 +422,12 @@ fun MotivationSection(modifier: Modifier = Modifier) {
 
 @Composable
 fun RocketIcon() {
-    Text(text = "\uD83D\uDE80", fontSize = 40.sp)
+    Text(
+        text = "\uD83D\uDE80",
+        fontSize = 40.sp
+    )
 }
+
 
 // Displays a summary of today's tasks, classes and exams.
 @Composable
@@ -431,19 +450,26 @@ fun TodayOverviewSection(
         java.time.DayOfWeek.FRIDAY -> DayOfWeek.FRIDAY
         else -> null
     }
+
     val todayTasks = tasks.count { task ->
         task.type == TaskType.TASK &&
                 task.dueDate == todayDate
     }
+
     val todayExams = tasks.count { task ->
         task.type == TaskType.EXAM &&
                 task.dueDate == todayDate
     }
+
     val todayLectures = lectures.count { lecture ->
         lecture.day == todayDay
     }
+
     Column {
-        Text(text = "Today's Overview")
+        Text(
+            text = "Today's Overview",
+            color = TextPrimary
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -479,10 +505,21 @@ fun TodayOverviewSection(
 
 // Reusable card component for today's overview statistics.
 @Composable
-fun OverViewCard(modifier: Modifier = Modifier, icon: String, number: String, title: String) {
-
-    Card(modifier = modifier.height(120.dp)) {
-        Column(modifier = Modifier.padding(16.dp)) {
+fun OverViewCard(
+    modifier: Modifier = Modifier,
+    icon: String,
+    number: String,
+    title: String
+) {
+    Card(
+        modifier = modifier.height(120.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = SpaceSurface
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
             Box(
                 modifier = Modifier
                     .size(40.dp)
@@ -490,16 +527,23 @@ fun OverViewCard(modifier: Modifier = Modifier, icon: String, number: String, ti
                     .background(Color.Gray),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = icon, fontSize = 20.sp)
+                Text(
+                    text = icon,
+                    fontSize = 20.sp
+                )
             }
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = number)
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(text = title)
 
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(text = number)
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            Text(text = title)
         }
     }
 }
+
 
 // Displays upcoming academic events and deadlines.
 @Composable
@@ -509,7 +553,6 @@ fun UpComingSection(
 ) {
     val today = LocalDate.now()
     val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-
 
     // Finds the next task with a valid future due date.
     val nextTask = tasks
@@ -527,7 +570,6 @@ fun UpComingSection(
             }
         }
         .minByOrNull { (_, date) -> date }
-
 
     // Finds the next exam with a valid future exam date.
     val nextExam = tasks
@@ -560,6 +602,7 @@ fun UpComingSection(
                 java.time.DayOfWeek.FRIDAY -> DayOfWeek.FRIDAY
                 else -> null
             }
+
             date to day
         }
         .firstNotNullOfOrNull { (date, day) ->
@@ -574,7 +617,11 @@ fun UpComingSection(
         }
 
     Column {
-        Text("Upcoming")
+        Text(
+            text = "Upcoming",
+            color = TextPrimary
+        )
+
         Spacer(modifier = Modifier.height(8.dp))
 
         UpcomingCard(
@@ -587,7 +634,8 @@ fun UpComingSection(
 
         UpcomingCard(
             title = nextLecture?.first?.title ?: "No Lectures today. ✨",
-            subtitle = nextLecture?.second?.format(dateFormatter) ?: "Enjoy the empty space",
+            subtitle = nextLecture?.second?.format(dateFormatter)
+                ?: "Enjoy the empty space",
             icon = "\uD83E\uDEA2"
         )
 
@@ -604,9 +652,19 @@ fun UpComingSection(
 
 // Reusable card displaying an upcoming activity or event.
 @Composable
-fun UpcomingCard(title: String, subtitle: String, icon: String) {
-    Card {
-        Column(modifier = Modifier.padding(12.dp)) {
+fun UpcomingCard(
+    title: String,
+    subtitle: String,
+    icon: String
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = SpaceSurface
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp)
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -623,18 +681,23 @@ fun UpcomingCard(title: String, subtitle: String, icon: String) {
                         fontSize = 24.sp
                     )
                 }
+
                 Spacer(modifier = Modifier.width(12.dp))
 
-                Column(modifier = Modifier.weight(1f)) {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
                     Text(
                         text = title,
                         fontWeight = FontWeight.Medium
                     )
+
                     Spacer(modifier = Modifier.height(2.dp))
+
                     Text(
                         text = subtitle,
                         fontSize = 14.sp,
-                        color = Color.Gray
+                        color = TextSecondary
                     )
                 }
             }
