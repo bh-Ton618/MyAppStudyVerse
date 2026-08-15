@@ -36,6 +36,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,12 +46,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.myappstudyverse.data.local.DatabaseProvider
+import com.example.myappstudyverse.data.local.LectureRepository
 import com.example.myappstudyverse.ui.components.AppFilterChip
+import com.example.myappstudyverse.ui.viewmodel.LectureViewModel
+import com.example.myappstudyverse.ui.viewmodel.LectureViewModelFactory
 
 @Composable
 fun LectureDetailScreen(
@@ -57,37 +65,90 @@ fun LectureDetailScreen(
     lectureId: Int?
 ) {
 
+    val context = LocalContext.current
+
+    val lectureRepository = remember {
+        LectureRepository(
+            DatabaseProvider
+                .getDatabase(context)
+                .lectureDao()
+        )
+    }
+
+    val lectureViewModel: LectureViewModel = viewModel(
+        factory = LectureViewModelFactory(lectureRepository)
+    )
+
+    val lectures by lectureViewModel.lectures.collectAsState()
+
     var lectureTitle by remember { mutableStateOf("") }
     var selectedDay by remember { mutableStateOf(DayOfWeek.MONDAY) }
     var lectureRoom by remember { mutableStateOf("") }
-    var lectureStartTime by remember { mutableStateOf("08:00") }
-    var lectureEndTime by remember { mutableStateOf("10:00") }
+    var lectureStartTime by remember { mutableStateOf("") }
+    var lectureEndTime by remember { mutableStateOf("") }
     var lecturer by remember { mutableStateOf("") }
 
     var isStartTimeMenuExpanded by remember { mutableStateOf(false) }
     var isEndTimeMenuExpanded by remember { mutableStateOf(false) }
 
     val timeOptions = listOf(
-        "08:00", "08:30",
-        "09:00", "09:30",
-        "10:00", "10:30",
-        "11:00", "11:30",
-        "12:00", "12:30",
-        "13:00", "13:30",
-        "14:00", "14:30",
-        "15:00", "15:30",
-        "16:00", "16:30",
-        "17:00", "17:30",
-        "18:00", "18:30",
-        "19:00", "19:30",
-        "20:00", "20:30",
-        "21:00"
+        "08 AM",
+        "08:30 AM",
+        "09 AM",
+        "09:30 AM",
+        "10 AM",
+        "10:30 AM",
+        "11 AM",
+        "11:30 AM",
+        "12 PM",
+        "12:30 PM",
+        "01 PM",
+        "01:30 PM",
+        "02 PM",
+        "02:30 PM",
+        "03 PM",
+        "03:30 PM",
+        "04 PM",
+        "04:30 PM",
+        "05 PM",
+        "05:30 PM",
+        "06 PM",
+        "06:30 PM",
+        "07 PM",
+        "07:30 PM",
+        "08 PM",
+        "08:30 PM",
+        "09 PM"
     )
 
-    val validEndTimeOptions = timeOptions.filter { time ->
-        time > lectureStartTime
+    // Filters the end time options so that only times after the selected start time can be chosen.
+    val validEndTimeOptions = timeOptions.drop(
+        timeOptions.indexOf(lectureStartTime) + 1
+    )
+
+    // Loads lectures from the local database when the screen is opened.
+    LaunchedEffect(Unit) {
+        lectureViewModel.loadLectures()
     }
 
+    // Loads the selected lecture into the Lecture Detail Screen fields when editing an existing lecture.
+    LaunchedEffect(lectures, lectureId) {
+        if (lectureId != null) {
+
+            val existingLecture = lectures.find { lecture ->
+                lecture.id == lectureId
+            }
+
+            if (existingLecture != null) {
+                lectureTitle = existingLecture.title
+                selectedDay = existingLecture.day
+                lectureRoom = existingLecture.room
+                lectureStartTime = existingLecture.startTime
+                lectureEndTime = existingLecture.endTime
+                lecturer = existingLecture.lecturer ?: ""
+            }
+        }
+    }
     Scaffold(
         bottomBar = {
             Box(
@@ -104,7 +165,6 @@ fun LectureDetailScreen(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-
                     Row(
                         modifier = Modifier
                             .height(52.dp)
@@ -116,7 +176,22 @@ fun LectureDetailScreen(
                     ) {
                         TextButton(
                             onClick = {
-                                // TODO: Later delete
+
+                                if (lectureId != null) {
+
+                                    val existingLecture =
+                                        lectures.find { lecture ->
+                                            lecture.id == lectureId
+                                        }
+
+                                    if (existingLecture != null) {
+                                        lectureViewModel.deleteLecture(
+                                            existingLecture
+                                        )
+                                    }
+                                }
+
+                                navController.popBackStack()
                             }
                         ) {
                             Icon(
@@ -129,7 +204,6 @@ fun LectureDetailScreen(
                                 color = Color.White
                             )
                         }
-
                         Box(
                             modifier = Modifier
                                 .width(1.dp)
@@ -138,10 +212,33 @@ fun LectureDetailScreen(
                                     Color.White.copy(alpha = 0.5f)
                                 )
                         )
-
                         TextButton(
                             onClick = {
-                                // TODO: Later Save
+
+                                val hasRequiredInput =
+                                    lectureTitle.isNotBlank() &&
+                                            lectureStartTime.isNotBlank() &&
+                                            lectureEndTime.isNotBlank()
+                                if (hasRequiredInput) {
+                                    val lecture = Lecture(
+                                        id = lectureId ?: 0,
+                                        title = lectureTitle,
+                                        room = lectureRoom,
+                                        day = selectedDay,
+                                        startTime = lectureStartTime,
+                                        endTime = lectureEndTime,
+                                        lecturer = lecturer.ifBlank {
+                                            null
+                                        }
+                                    )
+                                    if (lectureId == null) {
+                                        lectureViewModel.addLecture(lecture)
+                                    } else {
+                                        lectureViewModel.updateLecture(lecture)
+                                    }
+
+                                    navController.popBackStack()
+                                }
                             }
                         ) {
                             Icon(
@@ -173,8 +270,34 @@ fun LectureDetailScreen(
         ) {
             IconButton(
                 onClick = {
+                    val hasRequiredInput =
+                        lectureTitle.isNotBlank() &&
+                                lectureStartTime.isNotBlank() &&
+                                lectureEndTime.isNotBlank()
+
+                    if (hasRequiredInput) {
+                        val lecture = Lecture(
+                            id = lectureId ?: 0,
+                            title = lectureTitle,
+                            room = lectureRoom,
+                            day = selectedDay,
+                            startTime = lectureStartTime,
+                            endTime = lectureEndTime,
+                            lecturer = lecturer.ifBlank {
+                                null
+                            }
+                        )
+
+                        if (lectureId == null) {
+                            lectureViewModel.addLecture(lecture)
+                        } else {
+                            lectureViewModel.updateLecture(lecture)
+                        }
+                    }
+
                     navController.popBackStack()
                 },
+
                 modifier = Modifier.offset(x = (-12).dp)
             ) {
                 Icon(
@@ -182,7 +305,6 @@ fun LectureDetailScreen(
                     contentDescription = "Back"
                 )
             }
-
             Spacer(modifier = Modifier.height(24.dp))
 
             Row(
@@ -202,7 +324,6 @@ fun LectureDetailScreen(
                         modifier = Modifier.size(24.dp)
                     )
                 }
-
                 Spacer(modifier = Modifier.width(10.dp))
 
                 Text(
@@ -215,15 +336,13 @@ fun LectureDetailScreen(
                     color = Color(0xFFA78BFA)
                 )
             }
-
             Spacer(modifier = Modifier.height(18.dp))
 
             Text(
-                text = "Lecture Title",
+                text = "Lecture Title *",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
-
             Spacer(modifier = Modifier.height(6.dp))
 
             BasicLectureTextField(
@@ -233,15 +352,13 @@ fun LectureDetailScreen(
                 },
                 placeholder = "Enter Lecture Title"
             )
-
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Day",
+                text = "Day *",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
-
             Spacer(modifier = Modifier.height(6.dp))
 
             Row(
@@ -250,7 +367,6 @@ fun LectureDetailScreen(
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-
                 AppFilterChip(
                     text = "Mon",
                     isSelected = selectedDay == DayOfWeek.MONDAY,
@@ -258,7 +374,6 @@ fun LectureDetailScreen(
                         selectedDay = DayOfWeek.MONDAY
                     }
                 )
-
                 AppFilterChip(
                     text = "Tue",
                     isSelected = selectedDay == DayOfWeek.TUESDAY,
@@ -266,7 +381,6 @@ fun LectureDetailScreen(
                         selectedDay = DayOfWeek.TUESDAY
                     }
                 )
-
                 AppFilterChip(
                     text = "Wed",
                     isSelected = selectedDay == DayOfWeek.WEDNESDAY,
@@ -274,7 +388,6 @@ fun LectureDetailScreen(
                         selectedDay = DayOfWeek.WEDNESDAY
                     }
                 )
-
                 AppFilterChip(
                     text = "Thu",
                     isSelected = selectedDay == DayOfWeek.THURSDAY,
@@ -282,7 +395,6 @@ fun LectureDetailScreen(
                         selectedDay = DayOfWeek.THURSDAY
                     }
                 )
-
                 AppFilterChip(
                     text = "Fri",
                     isSelected = selectedDay == DayOfWeek.FRIDAY,
@@ -291,7 +403,6 @@ fun LectureDetailScreen(
                     }
                 )
             }
-
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
@@ -299,7 +410,6 @@ fun LectureDetailScreen(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
-
             Spacer(modifier = Modifier.height(6.dp))
 
             BasicLectureTextField(
@@ -309,7 +419,6 @@ fun LectureDetailScreen(
                 },
                 placeholder = "Enter Room"
             )
-
             Spacer(modifier = Modifier.height(24.dp))
 
             Row(
@@ -322,11 +431,10 @@ fun LectureDetailScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "Start Time",
+                        text = "Start Time *",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
-
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Box {
@@ -353,7 +461,6 @@ fun LectureDetailScreen(
                                 fontSize = 16.sp
                             )
                         }
-
                         DropdownMenu(
                             expanded = isStartTimeMenuExpanded,
                             onDismissRequest = {
@@ -379,7 +486,12 @@ fun LectureDetailScreen(
 
                                             lectureStartTime = time
 
-                                            if (lectureEndTime <= time) {
+                                            if (
+                                                lectureEndTime.isNotEmpty() &&
+                                                timeOptions.indexOf(
+                                                    lectureEndTime
+                                                ) <= timeOptions.indexOf(time)
+                                            ) {
                                                 val startIndex =
                                                     timeOptions.indexOf(time)
 
@@ -405,13 +517,11 @@ fun LectureDetailScreen(
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
-
                     Text(
-                        text = "End Time",
+                        text = "End Time *",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
-
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Box {
@@ -471,7 +581,6 @@ fun LectureDetailScreen(
                     }
                 }
             }
-
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
@@ -479,7 +588,6 @@ fun LectureDetailScreen(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
-
             Spacer(modifier = Modifier.height(6.dp))
 
             BasicLectureTextField(

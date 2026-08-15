@@ -197,8 +197,10 @@ fun SpaceScreen(navController: NavHostController) {
                 AsyncImage(
                     model = loadedApodResponse.url,
                     contentDescription = loadedApodResponse.title,
-                    modifier = Modifier.fillMaxWidth(),
-                    contentScale = ContentScale.FillWidth
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(380.dp),
+                    contentScale = ContentScale.Crop
                 )
             } else if (loadedApodResponse.media_type == "video") {
                 Box(

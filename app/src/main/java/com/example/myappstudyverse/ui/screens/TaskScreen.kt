@@ -1,6 +1,7 @@
 package com.example.myappstudyverse.ui.screens
 
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -42,8 +43,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -52,12 +54,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.myappstudyverse.data.local.DatabaseProvider
+import com.example.myappstudyverse.data.local.TaskRepository
 import com.example.myappstudyverse.ui.components.AppFilterChip
+import com.example.myappstudyverse.ui.viewmodel.TaskViewModel
+import com.example.myappstudyverse.ui.viewmodel.TaskViewModelFactory
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 
 data class Task(
@@ -67,7 +78,11 @@ data class Task(
     val description: String = " ",
     val priority: Priority? = null,
     var isDone: Boolean,
-    val type: TaskType = TaskType.TASK
+    val type: TaskType = TaskType.TASK,
+    val createdAt: Long = System.currentTimeMillis(),
+
+    val professor: String? = null,
+    val examType: ExamType? = null
 )
 
 enum class TaskType {
@@ -102,6 +117,23 @@ fun TaskHeaderArtWork() {
 @Composable
 fun TasksScreen(navController: NavHostController) {
 
+
+    //Provides access to the local database and manages task data through the ViewModel.
+    val context = LocalContext.current
+
+    val taskRepository = remember {
+        TaskRepository(
+            DatabaseProvider
+                .getDatabase(context)
+                .taskDao()
+        )
+    }
+
+    val taskViewModel: TaskViewModel = viewModel(
+        factory = TaskViewModelFactory(taskRepository)
+    )
+
+
     // Stores the current UI state for filtering, searching and sorting tasks.
     var selectedFilterChip by remember { mutableStateOf("All") }
     var isSearchOpen by remember { mutableStateOf(false) }
@@ -113,91 +145,27 @@ fun TasksScreen(navController: NavHostController) {
     var isFabExpanded by remember { mutableStateOf(false) }
 
 
-    // Sample task data used to demonstrate task management features.
-    val taskList = remember {
-        mutableStateListOf(
-            Task(
-                id = 1,
-                "StudySwiftUI",
-                "02.08.2026",
-                "Program my own Apple Task App",
-                priority = Priority.HIGH,
-                true
-            ),
-            Task(
-                id = 2,
-                "Mathe Exam",
-                "29.07.2026",
-                "Study!",
-                priority = Priority.LOW,
-                false,
-                TaskType.EXAM
-            ),
-            Task(
-                id = 3,
-                "Physics Assignment",
-                "01.08.2026",
-                "can be done later :) ",
-                priority = Priority.MEDIUM,
-                false
-            ),
-            Task(
-                id = 4,
-                "Buy Groceries",
-                "15.07.2026",
-                "best when I have time this week",
-                priority = Priority.HIGH,
-                false
-            ),
-            Task(
-                id = 5,
-                "Prepare presentation",
-                "21.07.2026",
-                "about black wholes",
-                priority = Priority.LOW,
-                false
-            ),
-            Task(
-                id = 6,
-                "Call AOK",
-                "22.07.2026",
-                "to ask about insurance policy",
-                priority = Priority.LOW,
-                false
-            ),
-            Task(
-                id = 7,
-                "Gym Session",
-                "22.07.2026",
-                "wefwef",
-                priority = Priority.HIGH,
-                true
-            ),
-            Task(
-                id = 8,
-                "NASA Project",
-                "22.07.2026",
-                "study about moon artemis mission",
-                priority = Priority.MEDIUM,
-                false
-            ),
-            Task(
-                id = 9,
-                "Study Kotlin",
-                "22.07.2026",
-                "efwef",
-                priority = Priority.MEDIUM,
-                true
-            ),
-            Task(
-                id = 10,
-                "APP Project",
-                "22.07.2026",
-                "finish 3 screen by the end of the week",
-                priority = Priority.MEDIUM,
-                false
+    // Loads tasks from the local database when screen is first displayed.
+    LaunchedEffect(Unit) {
+        taskViewModel.loadTasks()
+    }
+    val taskList by taskViewModel.tasks.collectAsState()
+
+
+    // Converts the due date text into a date value for sorting.
+    fun getDueDateValue(dueDate: String): LocalDate? {
+        if (dueDate.isBlank()) {
+            return null
+        }
+
+        return try {
+            LocalDate.parse(
+                dueDate,
+                DateTimeFormatter.ofPattern("dd.MM.yyyy")
             )
-        )
+        } catch (e: DateTimeParseException) {
+            null
+        }
     }
 
 
@@ -205,16 +173,29 @@ fun TasksScreen(navController: NavHostController) {
     val sortedTaskList = when (selectedSortOption) {
 
         TaskSortOption.PRIORITY ->
-            taskList.sortedBy { task -> task.priority }
+            taskList.sortedBy { task ->
+                when (task.priority) {
+                    Priority.HIGH -> 0
+                    Priority.MEDIUM -> 1
+                    Priority.LOW -> 2
+                    null -> 3
+                }
+            }
 
         TaskSortOption.DUE_DATE ->
-            taskList.sortedBy { task -> task.dueDate }
+            taskList.sortedWith(
+                compareBy<Task> { task ->
+                    getDueDateValue(task.dueDate) == null
+                }.thenBy { task ->
+                    getDueDateValue(task.dueDate)
+                }
+            )
 
         TaskSortOption.TITLE ->
-            taskList.sortedBy { task -> task.title }
+            taskList.sortedBy { task -> task.title.lowercase() }
 
         TaskSortOption.CREATED_DATE ->
-            taskList.sortedBy { task -> task.id }
+            taskList.sortedBy { task -> task.createdAt }
     }
 
 
@@ -403,7 +384,7 @@ fun TasksScreen(navController: NavHostController) {
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Title") },
+                                text = { Text("Title A-Z") },
                                 onClick = {
                                     selectedSortOption = TaskSortOption.TITLE
                                     isFilterMenuExpanded = false
@@ -480,20 +461,14 @@ fun TasksScreen(navController: NavHostController) {
                         TaskCard(
                             task = task,
                             onTaskChecked = {
-                                val taskIndex =
-                                    taskList.indexOfFirst { currentTask ->
-                                        currentTask.id == task.id
-                                    }
-                                if (taskIndex != -1) {
-                                    taskList[taskIndex] = task.copy(
+                                taskViewModel.updateTask(
+                                    task.copy(
                                         isDone = !task.isDone
                                     )
-                                }
+                                )
                             },
                             onTaskDeleted = {
-                                taskList.removeAll { currentTask ->
-                                    currentTask.id == task.id
-                                }
+                                taskViewModel.deleteTask(task)
                             },
                             onTaskClick = {
                                 navController.navigate("taskDetail/${task.id}")
@@ -551,7 +526,12 @@ fun TaskCard(
                 onLongClick = {
                     isTaskLongPressMenuExpanded = true
                 }
-            )
+            ),
+        border = if (task.type == TaskType.EXAM) {
+            BorderStroke(width = 1.dp, color = Color(0xFFA78BFA))
+        } else {
+            null
+        }
     ) {
         Row(
             modifier = Modifier
@@ -611,8 +591,17 @@ fun TaskCard(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Due: ${task.dueDate}",
-                        fontSize = 14.sp
+                        text = if (task.dueDate.isNotBlank()) {
+                            "Due: ${task.dueDate}"
+                        } else {
+                            " "
+                        },
+                        fontSize = 14.sp,
+                        color = if (task.dueDate.isNotBlank()) {
+                            Color.Unspecified
+                        } else {
+                            Color.Transparent
+                        }
                     )
                 }
             }

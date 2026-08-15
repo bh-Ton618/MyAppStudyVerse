@@ -29,22 +29,34 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.myappstudyverse.data.local.DatabaseProvider
+import com.example.myappstudyverse.data.local.TaskRepository
 import com.example.myappstudyverse.ui.components.AppFilterChip
+import com.example.myappstudyverse.ui.viewmodel.TaskViewModel
+import com.example.myappstudyverse.ui.viewmodel.TaskViewModelFactory
+import kotlinx.coroutines.launch
 
 @Composable
 fun TaskDetailScreen(
@@ -55,16 +67,93 @@ fun TaskDetailScreen(
 
     var taskTitle by remember { mutableStateOf("") }
     var taskDescription by remember { mutableStateOf("") }
-    var taskDueDate by remember { mutableStateOf("02.08.2026") }
-    var taskProfessor by remember { mutableStateOf("") }
+    var taskDueDate by remember { mutableStateOf("") }
+    var examProfessor by remember { mutableStateOf("") }
     var selectedPriority by remember { mutableStateOf<Priority?>(null) }
     var selectedExamType by remember { mutableStateOf<ExamType?>(ExamType.WRITTEN) }
     var isTaskDone by remember { mutableStateOf(false) }
+    var hasLoadedExistingTask by remember { mutableStateOf(false) }
+
+    // Controls the short message shown saving an existing task.
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+
+    val context = LocalContext.current
+
+    val taskRepository = remember {
+        TaskRepository(
+            DatabaseProvider
+                .getDatabase(context)
+                .taskDao()
+        )
+    }
+
+    val taskViewModel: TaskViewModel = viewModel(
+        factory = TaskViewModelFactory(taskRepository)
+    )
+
+    val taskList by taskViewModel.tasks.collectAsState()
 
     val isExam = taskType == TaskType.EXAM
     val isNew = taskId == null
 
+    // Loads the task data from the local database when editing an existing task.
+    LaunchedEffect(Unit) {
+        taskViewModel.loadTasks()
+    }
+
+    LaunchedEffect(taskList, taskId) {
+        if (!isNew && !hasLoadedExistingTask) {
+            val existingTask = taskList.find { task ->
+                task.id == taskId
+            }
+
+            if (existingTask != null) {
+                taskTitle = existingTask.title
+                taskDescription = existingTask.description
+                taskDueDate = existingTask.dueDate
+                examProfessor = existingTask.professor ?: ""
+                selectedPriority = existingTask.priority
+                selectedExamType = existingTask.examType
+                isTaskDone = existingTask.isDone
+                hasLoadedExistingTask = true
+            }
+        }
+    }
+
     Scaffold(
+        snackbarHost = {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                SnackbarHost(
+                    hostState = snackbarHostState
+                ) { snackbarData ->
+                    Box(
+                        modifier = Modifier
+                            .width(120.dp)
+                            .height(48.dp)
+                            .offset(y = 80.dp)
+                            .border(
+                                width = 0.5.dp,
+                                color = Color(0xFF7C4DFF),
+                                shape = RoundedCornerShape(14.dp)
+                            )
+                            .background(
+                                color = Color.White,
+                                shape = RoundedCornerShape(14.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = snackbarData.visuals.message,
+                            color = Color(0xFF7C4DFF)
+                        )
+                    }
+                }
+            }
+        },
         bottomBar = {
             Box(
                 modifier = Modifier
@@ -133,8 +222,17 @@ fun TaskDetailScreen(
                     ) {
                         TextButton(
                             onClick = {
+                                if (!isNew) {
+                                    val existingTask = taskList.find { task ->
+                                        task.id == taskId
+                                    }
 
-                                // TODO: Later delete
+                                    if (existingTask != null) {
+                                        taskViewModel.deleteTask(existingTask)
+                                    }
+                                }
+
+                                navController.popBackStack()
                             }
                         ) {
                             Icon(
@@ -156,7 +254,56 @@ fun TaskDetailScreen(
                         TextButton(
                             onClick = {
 
-                                // TODO: later Save
+                                val hasRequiredInput = if (isExam) {
+                                    taskTitle.isNotBlank() && taskDueDate.isNotBlank()
+                                } else {
+                                    taskTitle.isNotBlank()
+                                }
+
+                                if (hasRequiredInput) {
+                                    val task = Task(
+                                        id = if (isNew) 0 else taskId,
+                                        title = taskTitle,
+                                        dueDate = taskDueDate,
+                                        description = taskDescription,
+                                        priority = selectedPriority,
+                                        isDone = isTaskDone,
+                                        type = if (isExam)
+                                            TaskType.EXAM
+                                        else
+                                            TaskType.TASK,
+                                        createdAt = if (isNew) {
+                                            System.currentTimeMillis()
+                                        } else {
+                                            taskList.find { existingTask ->
+                                                existingTask.id == taskId
+                                            }?.createdAt
+                                                ?: System.currentTimeMillis()
+                                        },
+                                        professor = if (isExam) {
+                                            examProfessor.takeIf { professorText ->
+                                                professorText.isNotBlank()
+                                            }
+                                        } else {
+                                            null
+                                        },
+                                        examType = if (isExam) {
+                                            selectedExamType
+                                        } else {
+                                            null
+                                        }
+                                    )
+
+                                    if (isNew) {
+                                        taskViewModel.addTask(task)
+                                        navController.popBackStack()
+                                    } else {
+                                        taskViewModel.updateTask(task)
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar("Saved")
+                                        }
+                                    }
+                                }
                             }
                         ) {
                             Icon(
@@ -187,7 +334,88 @@ fun TaskDetailScreen(
                 )
         ) {
             IconButton(
-                onClick = { navController.popBackStack() },
+                onClick = {
+                    if (isNew) {
+                        val hasRequiredInput = if (isExam) {
+                            taskTitle.isNotBlank() && taskDueDate.isNotBlank()
+                        } else {
+                            taskTitle.isNotBlank()
+                        }
+
+                        if (hasRequiredInput) {
+                            val task = Task(
+                                id = 0,
+                                title = taskTitle,
+                                dueDate = taskDueDate,
+                                description = taskDescription,
+                                priority = selectedPriority,
+                                isDone = isTaskDone,
+                                type = if (isExam)
+                                    TaskType.EXAM
+                                else
+                                    TaskType.TASK,
+                                createdAt = System.currentTimeMillis(),
+                                professor = if (isExam) {
+                                    examProfessor.takeIf { professorText ->
+                                        professorText.isNotBlank()
+                                    }
+                                } else {
+                                    null
+                                },
+                                examType = if (isExam) {
+                                    selectedExamType
+                                } else {
+                                    null
+                                }
+                            )
+
+                            taskViewModel.addTask(task)
+                        }
+                    } else {
+                        val hasRequiredInput = if (isExam) {
+                            taskTitle.isNotBlank() && taskDueDate.isNotBlank()
+                        } else {
+                            taskTitle.isNotBlank()
+                        }
+
+                        if (hasRequiredInput) {
+                            val existingTask = taskList.find { task ->
+                                task.id == taskId
+                            }
+
+                            if (existingTask != null) {
+                                val task = Task(
+                                    id = taskId,
+                                    title = taskTitle,
+                                    dueDate = taskDueDate,
+                                    description = taskDescription,
+                                    priority = selectedPriority,
+                                    isDone = isTaskDone,
+                                    type = if (isExam)
+                                        TaskType.EXAM
+                                    else
+                                        TaskType.TASK,
+                                    createdAt = existingTask.createdAt,
+                                    professor = if (isExam) {
+                                        examProfessor.takeIf { professorText ->
+                                            professorText.isNotBlank()
+                                        }
+                                    } else {
+                                        null
+                                    },
+                                    examType = if (isExam) {
+                                        selectedExamType
+                                    } else {
+                                        null
+                                    }
+                                )
+
+                                taskViewModel.updateTask(task)
+                            }
+                        }
+                    }
+                    navController.popBackStack()
+                },
                 modifier = Modifier.offset(x = (-12).dp)
             ) {
                 Icon(
@@ -241,9 +469,9 @@ fun TaskDetailScreen(
             )
             Text(
                 text = if (isExam)
-                    "Exam Title"
+                    "Exam Title *"
                 else
-                    "Task Title",
+                    "Task Title *",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -340,7 +568,7 @@ fun TaskDetailScreen(
             )
             Text(
                 text = if (isExam)
-                    "Exam Date"
+                    "Exam Date *"
                 else
                     "Due Date",
                 fontSize = 16.sp,
@@ -367,7 +595,23 @@ fun TaskDetailScreen(
                     ),
                 textStyle = LocalTextStyle.current.copy(
                     fontSize = 16.sp
-                )
+                ),
+                decorationBox = { innerTextField ->
+                    Box {
+                        if (taskDueDate.isEmpty()) {
+                            Text(
+                                text = if (isExam)
+                                    "Enter Exam Date (DD.MM.YYYY)"
+                                else
+                                    "Enter Due Date (DD.MM.YYYY)",
+                                fontSize = 16.sp,
+                                color = Color.LightGray
+                            )
+                        }
+
+                        innerTextField()
+                    }
+                }
             )
 
             if (isExam) {
@@ -381,9 +625,9 @@ fun TaskDetailScreen(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 BasicTextField(
-                    value = taskProfessor,
+                    value = examProfessor,
                     onValueChange = { newTaskProfessor ->
-                        taskProfessor = newTaskProfessor
+                        examProfessor = newTaskProfessor
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -403,7 +647,7 @@ fun TaskDetailScreen(
                     singleLine = true,
                     decorationBox = { innerTextField ->
                         Box {
-                            if (taskProfessor.isEmpty()) {
+                            if (examProfessor.isEmpty()) {
                                 Text(
                                     text = "Enter Professor",
                                     fontSize = 16.sp,

@@ -1,7 +1,9 @@
 package com.example.myappstudyverse.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,7 +24,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CoPresent
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -31,8 +36,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,14 +46,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.myappstudyverse.data.local.DatabaseProvider
+import com.example.myappstudyverse.data.local.LectureRepository
 import com.example.myappstudyverse.ui.components.AppFilterChip
+import com.example.myappstudyverse.ui.viewmodel.LectureViewModel
+import com.example.myappstudyverse.ui.viewmodel.LectureViewModelFactory
+import java.time.LocalDate
+import java.time.DayOfWeek as JavaDayOfWeek
 
 
 data class Lecture(
@@ -55,8 +70,9 @@ data class Lecture(
     val title: String,
     val room: String,
     val day: DayOfWeek,
-    val startTime: String,  // later localTime/localDateTime
-    val endTime: String // later localTime/localDateTime
+    val startTime: String,
+    val endTime: String,
+    val lecturer: String?
 )
 
 enum class DayOfWeek {
@@ -91,15 +107,42 @@ private fun mapDayToColumn(day: DayOfWeek): Int {
 
 // Converts lecture start times into timetable row indices.
 private fun mapTimeToRow(time: String, hours: List<String>): Int {
-    return hours.indexOf(time)
+
+    val timeWithoutAMPM = time.substringBefore(" ")
+    val amOrPm = time.substringAfter(" ")
+    val hour = timeWithoutAMPM.substringBefore(":").toInt()
+    val minute = if (timeWithoutAMPM.contains(":")) {
+        timeWithoutAMPM.substringAfter(":").toInt()
+    } else {
+        0
+    }
+
+    val hourIn24Format = when {
+        amOrPm == "AM" && hour == 12 -> 0
+        amOrPm == "AM" -> hour
+        amOrPm == "PM" && hour == 12 -> 12
+        else -> hour + 12
+    }
+
+    return ((hourIn24Format * 60 + minute) - (8 * 60)) / 30
 }
 
 
 // Formats lecture times for compact display inside lecture cards.
-private fun formatLectureTime(start: String, end: String): String {
-    val formattedStart = start.substringBefore(" ").trimStart('0')
-    val formattedEnd = end.substringBefore(" ").trimStart('0')
-    return "$formattedStart-$formattedEnd"
+private fun formatLectureTime(
+    start: String,
+    end: String,
+    isDayView: Boolean
+): String {
+
+    if (isDayView) {
+        return "$start-$end"
+    }
+
+    val startTime = start.substringBefore(" ").trimStart('0')
+    val endTime = end.substringBefore(" ").trimStart('0')
+
+    return "$startTime-$endTime"
 }
 
 
@@ -107,117 +150,91 @@ private fun formatLectureTime(start: String, end: String): String {
 @Composable
 fun LectureScreen(navController: NavHostController) {
 
+    // Provides access to the local database and manages lecture data through the ViewModel.
+    val context = LocalContext.current
+
+    val lectureRepository = remember {
+        LectureRepository(
+            DatabaseProvider
+                .getDatabase(context)
+                .lectureDao()
+        )
+    }
+
+    val lectureViewModel: LectureViewModel = viewModel(
+        factory = LectureViewModelFactory(lectureRepository)
+    )
+
+
     // Stores the currently selected timetable view.
     var selectedView by remember { mutableStateOf(LectureView.WEEK) }
 
 
-    // Sample timetable data used for demonstrating the timetable layout.
-    val lectureEntries = remember {
-        mutableStateListOf(
-            Lecture(
-                id = 1,
-                title = "Mathematics",
-                room = "B-101",
-                day = DayOfWeek.MONDAY,
-                startTime = "08 AM",
-                endTime = "10 AM"
-            ),
-            Lecture(
-                id = 2,
-                title = "Informatics",
-                room = "AB-100",
-                day = DayOfWeek.TUESDAY,
-                startTime = "12 PM",
-                endTime = "02 PM"
-            ),
-            Lecture(
-                id = 3,
-                title = "App Programming 2.",
-                room = "B-400",
-                day = DayOfWeek.TUESDAY,
-                startTime = "08 AM",
-                endTime = "10 AM"
-            ),
-            Lecture(
-                id = 4,
-                title = "Physics",
-                room = "A-111",
-                day = DayOfWeek.FRIDAY,
-                startTime = "02 PM",
-                endTime = "04 PM"
-            ),
-            Lecture(
-                id = 5,
-                title = "Marketing",
-                room = "B-404",
-                day = DayOfWeek.THURSDAY,
-                startTime = "11 AM",
-                endTime = "04 PM"
-            ),
-            Lecture(
-                id = 6,
-                title = " Immun - Biology",
-                room = "B-101",
-                day = DayOfWeek.MONDAY,
-                startTime = "10 AM",
-                endTime = "12 PM"
-            ),
-            Lecture(
-                id = 7,
-                title = "Business and Communications",
-                room = "B-101",
-                day = DayOfWeek.WEDNESDAY,
-                startTime = "12 PM",
-                endTime = "02 PM"
-            ),
-            Lecture(
-                id = 8,
-                title = "Web Development",
-                room = "B-101",
-                day = DayOfWeek.WEDNESDAY,
-                startTime = "02 PM",
-                endTime = "04 PM"
-            ),
-            Lecture(
-                id = 9,
-                title = "App Android Exam :D",
-                room = "A-002",
-                day = DayOfWeek.WEDNESDAY,
-                startTime = "08 PM",
-                endTime = "09 PM"
-            ),
-            Lecture(
-                id = 10,
-                title = "IT Security",
-                room = "B-101",
-                day = DayOfWeek.TUESDAY,
-                startTime = "07 PM",
-                endTime = "09 PM"
-            ),
-        )
-
+    // Loads lectures from the local database when the screen is first displayed.
+    LaunchedEffect(Unit) {
+        lectureViewModel.loadLectures()
     }
+
+    val lectureEntries by lectureViewModel.lectures.collectAsState()
+
+
+    // Determines the current weekday and the dates of the current week.
+    val currentDate = LocalDate.now()
+
+    val currentDay = when (currentDate.dayOfWeek) {
+        JavaDayOfWeek.MONDAY -> DayOfWeek.MONDAY
+        JavaDayOfWeek.TUESDAY -> DayOfWeek.TUESDAY
+        JavaDayOfWeek.WEDNESDAY -> DayOfWeek.WEDNESDAY
+        JavaDayOfWeek.THURSDAY -> DayOfWeek.THURSDAY
+        JavaDayOfWeek.FRIDAY -> DayOfWeek.FRIDAY
+        JavaDayOfWeek.SATURDAY -> null
+        JavaDayOfWeek.SUNDAY -> null
+    }
+
+    val startOfWeek = currentDate.minusDays(
+        currentDate.dayOfWeek.value - JavaDayOfWeek.MONDAY.value.toLong()
+    )
+
+    val mondayDate = startOfWeek.dayOfMonth.toString()
+    val tuesdayDate = startOfWeek.plusDays(1).dayOfMonth.toString()
+    val wednesdayDate = startOfWeek.plusDays(2).dayOfMonth.toString()
+    val thursdayDate = startOfWeek.plusDays(3).dayOfMonth.toString()
+    val fridayDate = startOfWeek.plusDays(4).dayOfMonth.toString()
+
 
     // Defines the lecture's hourly time slots.
     val hours = listOf(
         "08 AM",
+        "08:30",
         "09 AM",
+        "09:30",
         "10 AM",
+        "10:30",
         "11 AM",
+        "11:30",
         "12 PM",
+        "12:30",
         "01 PM",
+        "01:30",
         "02 PM",
+        "02:30",
         "03 PM",
+        "03:30",
         "04 PM",
+        "04:30",
         "05 PM",
+        "05:30",
         "06 PM",
+        "06:30",
         "07 PM",
+        "07:30",
         "08 PM",
+        "08:30",
         "09 PM"
     )
 
-    // Shared height for each lecture slot to keep the timeline, grid and cards aligned.
-    val hourSlotHeight = 49.dp
+    // Shared height for each 30-minute lecture slot to keep the timeline, grid and cards aligned.
+    val hourSlotHeight = 24.5.dp
 
 
     Scaffold(
@@ -287,14 +304,28 @@ fun LectureScreen(navController: NavHostController) {
                     lectureEntries = lectureEntries,
                     hours = hours,
                     hourSlotHeight = hourSlotHeight,
-                    navController = navController
+                    navController = navController,
+                    currentDay = currentDay,
+                    mondayDate = mondayDate,
+                    tuesdayDate = tuesdayDate,
+                    wednesdayDate = wednesdayDate,
+                    thursdayDate = thursdayDate,
+                    fridayDate = fridayDate,
+
+                    onDeleteLecture = { lecture ->
+                        lectureViewModel.deleteLecture(lecture)
+                    }
                 )
             } else {
                 DayView(
                     lectureEntries = lectureEntries,
                     hours = hours,
                     hourSlotHeight = hourSlotHeight,
-                    navController = navController
+                    navController = navController,
+                    currentDay = currentDay,
+                    onDeleteLecture = { lecture ->
+                        lectureViewModel.deleteLecture(lecture)
+                    }
                 )
             }
         }
@@ -308,7 +339,14 @@ fun WeekView(
     lectureEntries: List<Lecture>,
     hours: List<String>,
     hourSlotHeight: Dp,
-    navController: NavHostController
+    navController: NavHostController,
+    currentDay: DayOfWeek?,
+    mondayDate: String,
+    tuesdayDate: String,
+    wednesdayDate: String,
+    thursdayDate: String,
+    fridayDate: String,
+    onDeleteLecture: (Lecture) -> Unit
 ) {
 
     Column {
@@ -319,11 +357,36 @@ fun WeekView(
                 .padding(start = 36.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            DayChip(day = "Mon", date = "13", isSelected = false, onClick = {})
-            DayChip(day = "Tue", date = "14", isSelected = false, onClick = {})
-            DayChip(day = "Wed", date = "15", isSelected = true, onClick = {})
-            DayChip(day = "Thu", date = "16", isSelected = false, onClick = {})
-            DayChip(day = "Fri", date = "17", isSelected = false, onClick = {})
+            DayChip(
+                day = "Mon",
+                date = mondayDate,
+                isSelected = currentDay == DayOfWeek.MONDAY,
+                onClick = {}
+            )
+            DayChip(
+                day = "Tue",
+                date = tuesdayDate,
+                isSelected = currentDay == DayOfWeek.TUESDAY,
+                onClick = {}
+            )
+            DayChip(
+                day = "Wed",
+                date = wednesdayDate,
+                isSelected = currentDay == DayOfWeek.WEDNESDAY,
+                onClick = {}
+            )
+            DayChip(
+                day = "Thu",
+                date = thursdayDate,
+                isSelected = currentDay == DayOfWeek.THURSDAY,
+                onClick = {}
+            )
+            DayChip(
+                day = "Fri",
+                date = fridayDate,
+                isSelected = currentDay == DayOfWeek.FRIDAY,
+                onClick = {}
+            )
         }
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -344,9 +407,13 @@ fun WeekView(
                         Text(
                             text = hour,
                             fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (hour.contains(":30"))
+                                Color.LightGray
+                            else
+                                Color.Unspecified
                         )
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(0.dp))
                     }
                 }
                 // Draws the timetable / lecture grid and places lecture cards at their calculated positions.
@@ -357,12 +424,15 @@ fun WeekView(
                 ) {
                     // Horizontal timetable lines.
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        hours.forEach { _ ->
+                        hours.forEach { hour ->
                             HorizontalDivider(
                                 thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.outlineVariant
+                                color = if (hour.contains(":30"))
+                                    Color.LightGray.copy(alpha = 0.5f)
+                                else
+                                    MaterialTheme.colorScheme.outlineVariant
                             )
-                            Spacer(modifier = Modifier.height(48.dp))
+                            Spacer(modifier = Modifier.height(23.5.dp))
                         }
                     }
                     // Vertical timetable lines.
@@ -407,6 +477,9 @@ fun WeekView(
                             modifier = Modifier.offset(x = xOffset, y = yOffset),
                             lecture = lecture,
                             onClick = { navController.navigate("lectureDetail/${lecture.id}") },
+                            onDeleteClick = {
+                                onDeleteLecture(lecture)
+                            },
                             lectureHeight = lectureHeight
                         )
                     }
@@ -424,7 +497,9 @@ fun DayView(
     lectureEntries: List<Lecture>,
     hours: List<String>,
     hourSlotHeight: Dp,
-    navController: NavHostController
+    navController: NavHostController,
+    currentDay: DayOfWeek?,
+    onDeleteLecture: (Lecture) -> Unit
 ) {
 
     Column(
@@ -434,7 +509,14 @@ fun DayView(
     ) {
 
         Text(
-            text = "Wednesday",
+            text = when (currentDay) {
+                DayOfWeek.MONDAY -> "Monday"
+                DayOfWeek.TUESDAY -> "Tuesday"
+                DayOfWeek.WEDNESDAY -> "Wednesday"
+                DayOfWeek.THURSDAY -> "Thursday"
+                DayOfWeek.FRIDAY -> "Friday"
+                null -> "It's the weekend ✨"
+            },
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
@@ -456,7 +538,11 @@ fun DayView(
                         Text(
                             text = hour,
                             style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (hour.contains(":30"))
+                                Color.LightGray
+                            else
+                                Color.Unspecified
                         )
                     }
                 }
@@ -468,21 +554,25 @@ fun DayView(
             ) {
                 // Horizontal lines ->
                 Column {
-                    hours.forEach { _ ->
+                    hours.forEach { hour ->
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(hourSlotHeight)
                         ) {
                             HorizontalDivider(
-                                modifier = Modifier.align(Alignment.TopCenter)
+                                modifier = Modifier.align(Alignment.TopCenter),
+                                color = if (hour.contains(":30"))
+                                    Color.LightGray.copy(alpha = 0.5f)
+                                else
+                                    MaterialTheme.colorScheme.outlineVariant
                             )
                         }
                     }
                 }
                 lectureEntries
                     // Displays only lectures scheduled for the selected day.
-                    .filter { lecture -> lecture.day == DayOfWeek.WEDNESDAY }
+                    .filter { lecture -> lecture.day == currentDay }
                     .forEach { lecture ->
 
                         val row = mapTimeToRow(lecture.startTime, hours)
@@ -497,7 +587,8 @@ fun DayView(
                             lecture = lecture,
                             lectureHeight = lectureHeight,
                             onClick = { navController.navigate("lectureDetail/${lecture.id}") },
-                            isDayView = true
+                            isDayView = true,
+                            onDeleteClick = { onDeleteLecture(lecture) }
 
                         )
                     }
@@ -542,8 +633,11 @@ fun LectureCard(
     lecture: Lecture,
     lectureHeight: Dp,
     onClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     isDayView: Boolean = false
 ) {
+
+    var isContextMenuExpanded by remember { mutableStateOf(false) }
 
     // Adjusts the lecture size depending on the selected timetable view (Week/Day).
     val cardWidth =
@@ -560,7 +654,14 @@ fun LectureCard(
             .width(cardWidth)
             .height(lectureHeight)
             .padding(2.dp)
-            .clickable { onClick() },
+            .combinedClickable(
+                onClick = {
+                    onClick()
+                },
+                onLongClick = {
+                    isContextMenuExpanded = true
+                }
+            ),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(modifier = Modifier.padding(horizontal = 6.dp, vertical = 6.dp)) {
@@ -571,12 +672,57 @@ fun LectureCard(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+
             Spacer(modifier = Modifier.height(2.dp))
+
             Text(text = lecture.room, fontSize = 12.sp)
             Spacer(modifier = Modifier.height(1.dp))
             Text(
-                text = formatLectureTime(start = lecture.startTime, end = lecture.endTime),
+                text = formatLectureTime(
+                    start = lecture.startTime,
+                    end = lecture.endTime,
+                    isDayView = isDayView
+                ),
                 fontSize = 12.sp
+            )
+        }
+
+        DropdownMenu(
+            expanded = isContextMenuExpanded,
+            onDismissRequest = {
+                isContextMenuExpanded = false
+            },
+            offset = DpOffset(
+                x = (-40).dp,
+                y = (-65).dp
+            ),
+            shape = RoundedCornerShape(18.dp),
+            border = BorderStroke(
+                width = 1.dp,
+                color = Color(0xFFA78BFA)
+            )
+        ) {
+            DropdownMenuItem(
+                modifier = Modifier
+                    .height(30.dp)
+                    .width(100.dp),
+                text = {
+                    Text(
+                        text = "Delete",
+                        color = Color.DarkGray
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = Color(0xFFA78BFA)
+                    )
+                },
+                onClick = {
+                    isContextMenuExpanded = false
+                    onDeleteClick()
+                }
             )
         }
     }

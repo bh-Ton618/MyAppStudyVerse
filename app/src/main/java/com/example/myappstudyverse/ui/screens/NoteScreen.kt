@@ -37,8 +37,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,17 +47,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.myappstudyverse.data.local.DatabaseProvider
+import com.example.myappstudyverse.data.local.NoteRepository
+import com.example.myappstudyverse.ui.viewmodel.NoteViewModel
+import com.example.myappstudyverse.ui.viewmodel.NoteViewModelFactory
 
 
 data class Note(
     val id: Int,
     val title: String,
-    val createdDate: String,
+    val createdDate: Long = System.currentTimeMillis(),
     val description: String,
     var isPinned: Boolean
 )
@@ -75,7 +82,21 @@ fun NotesHeaderArtWork() {
 
 // Main notes screen with search, sorting and pinned management.
 @Composable
-fun NotesScreen(navController: NavHostController) {
+fun NoteScreen(navController: NavHostController) {
+
+    val context = LocalContext.current
+
+    val noteRepository = remember {
+        NoteRepository(
+            DatabaseProvider
+                .getDatabase(context)
+                .noteDao()
+        )
+    }
+
+    val noteViewModel: NoteViewModel = viewModel(
+        factory = NoteViewModelFactory(noteRepository)
+    )
 
     // Stores the current UI state for searching, sorting and pinned note visibility.
     var isSearchOpen by remember { mutableStateOf(false) }
@@ -85,82 +106,26 @@ fun NotesScreen(navController: NavHostController) {
     var isPinnedSectionExpanded by remember { mutableStateOf(true) }
 
 
-    // Sample note data used for demonstrating note management features.
-    val notesList = remember {
-        mutableStateListOf(
-            Note(id = 1, "About Biology", "02.08.2026", "Learned today that ...", isPinned = true),
-            Note(
-                id = 2,
-                "Singularity",
-                "29.07.2026",
-                "Einstein: What does it actually mean?",
-                isPinned = true
-            ),
-            Note(
-                id = 3,
-                "MultiVerse",
-                "01.08.2026",
-                "Watched a documantary about that and ...",
-                isPinned = false
-            ),
-
-            Note(
-                id = 4,
-                "Legal things about rentals",
-                "15.07.2026",
-                "landlord told me...",
-                isPinned = false
-
-            ),
-            Note(id = 5, "Food and Cafes", "21.07.2026", "Berlin... location", isPinned = false),
-            Note(
-                id = 6,
-                "travel destinations",
-                "22.07.2026",
-                "Singapur, Hongkong, Italy",
-                isPinned = false
-            ),
-
-            Note(
-                id = 7,
-                "Travel plans",
-                "22.07.2026",
-                "Start:We first need to...",
-                isPinned = true
-            ),
-            Note(
-                id = 8,
-                "secrets ",
-                "22.07.2026",
-                "...",
-                isPinned = false
-            ),
-
-            Note(id = 9, "Inform Mom about", "22.07.2026", "about the house and", isPinned = false),
-            Note(
-                id = 10,
-                "Random",
-                "22.07.2026",
-                "random...",
-                isPinned = false
-
-            )
-        )
+    LaunchedEffect(Unit) {
+        noteViewModel.loadNotes()
     }
+
+    val notesList by noteViewModel.notes.collectAsState()
+
+
     // Sorts notes while always keeping pinned notes at the top.
-    // TODO: Replace ID sorting with createdTimeStamp after introducing persistent storage.
     val sortedNotesList = when (selectedSortOption) {
         NoteSortOption.NEWEST ->
-            notesList.sortedWith(compareByDescending<Note> { note -> note.isPinned }.thenByDescending { note -> note.id })
+            notesList.sortedWith(compareByDescending<Note> { note -> note.isPinned }.thenByDescending { note -> note.createdDate })
 
         NoteSortOption.OLDEST ->
-            notesList.sortedWith(compareByDescending<Note> { note -> note.isPinned }.thenBy { note -> note.id })
+            notesList.sortedWith(compareByDescending<Note> { note -> note.isPinned }.thenBy { note -> note.createdDate })
 
         NoteSortOption.TITLE_ASC ->
-            notesList.sortedWith(compareByDescending<Note> { note -> note.isPinned }.thenBy { note -> note.title })
+            notesList.sortedWith(compareByDescending<Note> { note -> note.isPinned }.thenBy { note -> note.title.lowercase() })
 
         NoteSortOption.TITLE_DESC ->
-            notesList.sortedWith(compareByDescending<Note> { note -> note.isPinned }.thenByDescending { note -> note.title })
+            notesList.sortedWith(compareByDescending<Note> { note -> note.isPinned }.thenByDescending { note -> note.title.lowercase() })
     }
 
 // Filters notes based on the entered search query.
@@ -252,14 +217,14 @@ fun NotesScreen(navController: NavHostController) {
                         }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Newest") },
+                            text = { Text("Newest created") },
                             onClick = {
                                 selectedSortOption = NoteSortOption.NEWEST
                                 isFilterMenuExpanded = false
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Oldest") },
+                            text = { Text("Oldest created") },
                             onClick = {
                                 selectedSortOption = NoteSortOption.OLDEST
                                 isFilterMenuExpanded = false
@@ -344,20 +309,28 @@ fun NotesScreen(navController: NavHostController) {
                             onNoteClick = {
                                 navController.navigate("noteDetail/${note.id}")
                             },
-                            onPinClick = { note.isPinned = false },
-                            onDeleteClick = { notesList.remove(note) }
+                            onPinClick = {
+                                noteViewModel.updateNote(
+                                    note.copy(isPinned = false)
+                                )
+                            },
+                            onDeleteClick = {
+                                noteViewModel.deleteNote(note)
+                            }
                         )
                     }
                     item {
                         Spacer(modifier = Modifier.height(20.dp))
                     }
                 }
-                item {
-                    Text(
-                        text = "Notes",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                if (unpinnedNotes.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "Notes",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
                 items(
                     items = unpinnedNotes,
@@ -368,8 +341,14 @@ fun NotesScreen(navController: NavHostController) {
                         onNoteClick = {
                             navController.navigate("noteDetail/${note.id}")
                         },
-                        onPinClick = { note.isPinned = true },
-                        onDeleteClick = { notesList.remove(note) }
+                        onPinClick = {
+                            noteViewModel.updateNote(
+                                note.copy(isPinned = true)
+                            )
+                        },
+                        onDeleteClick = {
+                            noteViewModel.deleteNote(note)
+                        }
                     )
                 }
 
@@ -425,7 +404,7 @@ fun NoteCard(
                         fontSize = 18.sp
                     )
                     Text(
-                        text = note.createdDate,
+                        text = note.createdDate.toString(),
                         fontSize = 14.sp
                     )
                 }

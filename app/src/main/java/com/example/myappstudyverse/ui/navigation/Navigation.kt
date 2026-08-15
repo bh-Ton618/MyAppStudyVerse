@@ -14,7 +14,7 @@ import com.example.myappstudyverse.ui.screens.DashboardScreen
 import com.example.myappstudyverse.ui.screens.LectureDetailScreen
 import com.example.myappstudyverse.ui.screens.LectureScreen
 import com.example.myappstudyverse.ui.screens.NoteDetailScreen
-import com.example.myappstudyverse.ui.screens.NotesScreen
+import com.example.myappstudyverse.ui.screens.NoteScreen
 import com.example.myappstudyverse.ui.screens.SpaceScreen
 import com.example.myappstudyverse.ui.screens.TaskDetailScreen
 import com.example.myappstudyverse.ui.screens.TaskType
@@ -74,7 +74,7 @@ fun StudyVerseNavigation() {
             }
 
             composable("notes") {
-                NotesScreen(navController)
+                NoteScreen(navController)
             }
             composable(route = "noteDetail/{noteId}") { backStackEntry ->
                 val noteId = backStackEntry.arguments?.getString("noteId")?.toIntOrNull()

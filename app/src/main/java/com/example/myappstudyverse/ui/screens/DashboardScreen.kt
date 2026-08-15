@@ -29,6 +29,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,13 +40,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.myappstudyverse.data.local.DatabaseProvider
+import com.example.myappstudyverse.data.local.LectureRepository
+import com.example.myappstudyverse.data.local.TaskRepository
+import com.example.myappstudyverse.ui.viewmodel.LectureViewModel
+import com.example.myappstudyverse.ui.viewmodel.LectureViewModelFactory
+import com.example.myappstudyverse.ui.viewmodel.TaskViewModel
+import com.example.myappstudyverse.ui.viewmodel.TaskViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 
 //Main dashboard screen providing quick access to app's core features.
@@ -54,6 +66,42 @@ fun DashboardScreen(
     modifier: Modifier = Modifier
 ) {
     var isFabExpanded by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+
+    val taskRepository = remember {
+        TaskRepository(
+            DatabaseProvider
+                .getDatabase(context)
+                .taskDao()
+        )
+    }
+
+    val taskViewModel: TaskViewModel = viewModel(
+        factory = TaskViewModelFactory(taskRepository)
+    )
+
+    val lectureRepository = remember {
+        LectureRepository(
+            DatabaseProvider
+                .getDatabase(context)
+                .lectureDao()
+        )
+    }
+
+    val lectureViewModel: LectureViewModel = viewModel(
+        factory = LectureViewModelFactory(lectureRepository)
+    )
+
+
+
+    LaunchedEffect(Unit) {
+        taskViewModel.loadTasks()
+        lectureViewModel.loadLectures()
+    }
+
+    val tasks by taskViewModel.tasks.collectAsState()
+    val lectures by lectureViewModel.lectures.collectAsState()
 
     Scaffold(
         // Floating action button reserved for creating future content (currently placeholder)
@@ -170,6 +218,34 @@ fun DashboardScreen(
                                     fontWeight = FontWeight.Medium
                                 )
                             }
+                            Row(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(Color.White)
+                                    .border(
+                                        width = 1.dp,
+                                        color = Color(0xFFA78BFA),
+                                        shape = RoundedCornerShape(50.dp)
+                                    )
+                                    .clickable {
+                                        isFabExpanded = false
+                                        navController.navigate("noteDetail/new")
+                                    }
+                                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.EditNote,
+                                    contentDescription = null,
+                                    tint = Color(0xFFA78BFA),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "New Note",
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
                         }
                     }
                 }
@@ -203,10 +279,10 @@ fun DashboardScreen(
                 MotivationSection()
                 Spacer(modifier = Modifier.height(24.dp))
 
-                TodayOverviewSection()
+                TodayOverviewSection(tasks = tasks, lectures = lectures)
                 Spacer(modifier = Modifier.height(16.dp))
 
-                UpComingSection()
+                UpComingSection(tasks = tasks, lectures = lectures)
                 Spacer(modifier = Modifier.height(16.dp))
 
             }
@@ -265,7 +341,7 @@ fun GreetingSection() {
 @Composable
 fun MotivationSection(modifier: Modifier = Modifier) {
 
-    // TODO: Replace random selection with a daily quote based on the current date.
+
     val motivationalQuotes = listOf(
         "Shoot for the moon. Even if you miss, you'll land among the stars.",
         "Every great journey begins with a single step into the unknown.",
@@ -278,7 +354,8 @@ fun MotivationSection(modifier: Modifier = Modifier) {
         "Keep looking up. The sky is never the limit.",
         "Great discoveries begin with the courage to launch."
     )
-    val dailyQuote = remember { motivationalQuotes.random() }
+    val currentDay = LocalDate.now().dayOfYear
+    val dailyQuote = motivationalQuotes[currentDay % motivationalQuotes.size]
 
 
     Card(
@@ -335,35 +412,70 @@ fun RocketIcon() {
 
 // Displays a summary of today's tasks, classes and exams.
 @Composable
-fun TodayOverviewSection() {
+fun TodayOverviewSection(
+    tasks: List<Task>,
+    lectures: List<Lecture>
+) {
+
+    val today = LocalDate.now()
+
+    val todayDate = today.format(
+        DateTimeFormatter.ofPattern("dd.MM.yyyy")
+    )
+
+    val todayDay = when (today.dayOfWeek) {
+        java.time.DayOfWeek.MONDAY -> DayOfWeek.MONDAY
+        java.time.DayOfWeek.TUESDAY -> DayOfWeek.TUESDAY
+        java.time.DayOfWeek.WEDNESDAY -> DayOfWeek.WEDNESDAY
+        java.time.DayOfWeek.THURSDAY -> DayOfWeek.THURSDAY
+        java.time.DayOfWeek.FRIDAY -> DayOfWeek.FRIDAY
+        else -> null
+    }
+    val todayTasks = tasks.count { task ->
+        task.type == TaskType.TASK &&
+                task.dueDate == todayDate
+    }
+    val todayExams = tasks.count { task ->
+        task.type == TaskType.EXAM &&
+                task.dueDate == todayDate
+    }
+    val todayLectures = lectures.count { lecture ->
+        lecture.day == todayDay
+    }
     Column {
         Text(text = "Today's Overview")
+
         Spacer(modifier = Modifier.height(8.dp))
+
         Row {
             OverViewCard(
                 modifier = Modifier.weight(1f),
                 icon = "\uD83D\uDCCB",
-                number = "12",
-                title = "Task"
+                number = todayTasks.toString(),
+                title = if (todayTasks == 1) "Task" else "Tasks"
             )
+
             Spacer(modifier = Modifier.width(8.dp))
+
             OverViewCard(
                 modifier = Modifier.weight(1f),
                 icon = "\uD83D\uDCDA",
-                number = "2",
-                title = "Lecture"
+                number = todayLectures.toString(),
+                title = if (todayLectures == 1) "Lecture" else "Lectures"
             )
+
             Spacer(modifier = Modifier.width(8.dp))
+
             OverViewCard(
                 modifier = Modifier.weight(1f),
                 icon = "\uD83D\uDCDD",
-                number = "1",
-                title = "Exam"
+                number = todayExams.toString(),
+                title = if (todayExams == 1) "Exam" else "Exams"
             )
         }
     }
-
 }
+
 
 // Reusable card component for today's overview statistics.
 @Composable
@@ -391,32 +503,104 @@ fun OverViewCard(modifier: Modifier = Modifier, icon: String, number: String, ti
 
 // Displays upcoming academic events and deadlines.
 @Composable
-fun UpComingSection() {
+fun UpComingSection(
+    tasks: List<Task>,
+    lectures: List<Lecture>
+) {
+    val today = LocalDate.now()
+    val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+
+
+    // Finds the next task with a valid future due date.
+    val nextTask = tasks
+        .mapNotNull { task ->
+            try {
+                val date = LocalDate.parse(task.dueDate, dateFormatter)
+
+                if (!date.isBefore(today)) {
+                    task to date
+                } else {
+                    null
+                }
+            } catch (e: DateTimeParseException) {
+                null
+            }
+        }
+        .minByOrNull { (_, date) -> date }
+
+
+    // Finds the next exam with a valid future exam date.
+    val nextExam = tasks
+        .filter { task -> task.type == TaskType.EXAM }
+        .mapNotNull { exam ->
+            try {
+                val date = LocalDate.parse(exam.dueDate, dateFormatter)
+
+                if (!date.isBefore(today)) {
+                    exam to date
+                } else {
+                    null
+                }
+            } catch (e: DateTimeParseException) {
+                null
+            }
+        }
+        .minByOrNull { (_, date) -> date }
+
+    // Finds the next weekday with a lecture.
+    val nextLecture = (0..6)
+        .map { daysFromToday ->
+            val date = today.plusDays(daysFromToday.toLong())
+
+            val day = when (date.dayOfWeek) {
+                java.time.DayOfWeek.MONDAY -> DayOfWeek.MONDAY
+                java.time.DayOfWeek.TUESDAY -> DayOfWeek.TUESDAY
+                java.time.DayOfWeek.WEDNESDAY -> DayOfWeek.WEDNESDAY
+                java.time.DayOfWeek.THURSDAY -> DayOfWeek.THURSDAY
+                java.time.DayOfWeek.FRIDAY -> DayOfWeek.FRIDAY
+                else -> null
+            }
+            date to day
+        }
+        .firstNotNullOfOrNull { (date, day) ->
+            if (day == null) {
+                null
+            } else {
+                lectures
+                    .filter { lecture -> lecture.day == day }
+                    .minByOrNull { lecture -> lecture.startTime }
+                    ?.let { lecture -> lecture to date }
+            }
+        }
+
     Column {
         Text("Upcoming")
         Spacer(modifier = Modifier.height(8.dp))
+
         UpcomingCard(
-            title = "Math Homework",
-            subtitle = "Due Tomorrow 2PM",
+            title = nextTask?.first?.title ?: "No missions ✨",
+            subtitle = nextTask?.first?.dueDate ?: "Your mission log is clear.",
             icon = "\uD83D\uDCD8"
         )
+
         Spacer(modifier = Modifier.height(8.dp))
 
         UpcomingCard(
-            title = "Physics Class",
-            subtitle = "Tomorrow 4PM",
-            icon = "\uD83E\uDDEA"
+            title = nextLecture?.first?.title ?: "No Lectures today. ✨",
+            subtitle = nextLecture?.second?.format(dateFormatter) ?: "Enjoy the empty space",
+            icon = "\uD83E\uDEA2"
         )
+
         Spacer(modifier = Modifier.height(8.dp))
 
         UpcomingCard(
-            title = "Business Communication Exam",
-            subtitle = "Tomorrow 8AM ",
+            title = nextExam?.first?.title ?: "Exam free zone ✨",
+            subtitle = nextExam?.first?.dueDate ?: "No tests on the radar.",
             icon = "\uD83D\uDCDD"
         )
-
     }
 }
+
 
 // Reusable card displaying an upcoming activity or event.
 @Composable
