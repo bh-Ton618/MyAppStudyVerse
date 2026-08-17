@@ -4,6 +4,10 @@ Author: Anna Magdalena Bustowska
 # StudyVerse
 *Orbit your Goals*  ✨
 
+
+StudyVerse is a personal study management app designed to help students and learners organize tasks, exams, lectures, notes, and study schedules in one place. It combines practical study organization with a space-themed experience, including NASA’s Astronomy Picture of the Day for a small touch of exploration beyond everyday studying.
+
+
 ## Features
 - Dashboard
 - Tasks & Exams
