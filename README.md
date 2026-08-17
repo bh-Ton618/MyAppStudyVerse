@@ -13,31 +13,43 @@ Author: Anna Magdalena Bustowska
 
 ## Screenshots
 
-<div>
-  <img src="https://github.com/user-attachments/assets/ed48d9cc-09f0-4a32-bf43-41f7da9e700b" alt="dashboard" width="170">&nbsp;&nbsp;
-  <img src="https://github.com/user-attachments/assets/3fe494df-7420-4440-80fb-db1414d9d106" alt="tasks" width="170">&nbsp;&nbsp;
-  <img src="https://github.com/user-attachments/assets/e3444a3f-8f56-400e-8a21-4556f7e25be5" alt="exam" width="170">&nbsp;&nbsp;
-  <img src="https://github.com/user-attachments/assets/136d7c80-4643-4583-9d31-4eb3fa2aeb29" alt="lectures" width="170">
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/0b55ca42-960a-4710-9351-410563144f12" alt="Start Screen" width="170" hspace="10">
+  <img src="https://github.com/user-attachments/assets/54c1ef60-4d47-428c-be0e-3d1412f14c7e" alt="Welcome Screen" width="170" hspace="10">
+  <img src="https://github.com/user-attachments/assets/5459e083-99a0-45d1-8e42-b32d337795fd" alt="Dashboard" width="170" hspace="10">
+  <img src="https://github.com/user-attachments/assets/1557bbb3-3c72-4eb4-b10b-3feef02b8d75" alt="Task Overview" width="170" hspace="10">
 </div>
 
-<br>
+<p>&nbsp;</p>
 
-<div>
-  <img src="https://github.com/user-attachments/assets/534eb1c1-6705-4526-b64f-a6e8f8ec2c63" alt="dayViewLecture" width="170">&nbsp;&nbsp;
-  <img src="https://github.com/user-attachments/assets/f8cc1e0f-b4c3-479f-80ce-62d6d903801b" alt="notescreen" width="170">&nbsp;&nbsp;
-  <img src="https://github.com/user-attachments/assets/12a3299f-8da8-4bc3-a815-83efa6d36a1b" alt="note" width="170">&nbsp;&nbsp;
-  <img src="https://github.com/user-attachments/assets/6987b3c0-0938-4b7a-bf76-50472e4c0be9" alt="space" width="170">
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/f35a4be3-1a0e-41f0-ac96-57a22054a4ba" alt="Task Detail" width="170" hspace="10">
+  <img src="https://github.com/user-attachments/assets/8fc90823-4b45-46d7-881c-b6b9343bb1ca" alt="Lectures" width="170" hspace="10">
+  <img src="https://github.com/user-attachments/assets/21a68217-4fb4-4317-be71-d3408570509f" alt="Lecture Day View" width="170" hspace="10">
+  <img src="https://github.com/user-attachments/assets/27c628c4-8ec5-42bc-a368-ed71651d018c" alt="Lecture Detail" width="170" hspace="10">
 </div>
+
+<p>&nbsp;</p>
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/a5729ac4-3d39-478f-a701-b1a288635263" alt="Notes" width="170" hspace="10">
+  <img src="https://github.com/user-attachments/assets/aaf88df3-807b-4212-80f8-be7ee4cf9aa7" alt="Note Detail" width="170" hspace="10">
+  <img src="https://github.com/user-attachments/assets/27412e15-fc88-4b6c-827d-b2d1330e3e55" alt="NASA Screen" width="170" hspace="10">
+  <img src="https://github.com/user-attachments/assets/caf6ae02-a08d-4094-930f-e77fcd172c43" alt="NASA Exception" width="170" hspace="10">
+</div>
+
 
 
 ## Application Flowchart
+
+For better readability and "zoom in" please visit [MIROBOARD](https://miro.com/app/board/uXjVHVLaWW4=/?share_link_id=420395641723)
 
 <img width="2767" height="1445" alt="MyAppStudyVerseFlowchartV3" src="https://github.com/user-attachments/assets/daf2c1a2-9328-4f89-b2fb-cfad0a554ec0" />
 
 
 ## Demo
 
-[Watch the StudyVerse Demo](https://drive.google.com/file/d/1XmJHB_pjRiaaQYraGsICTF6XR3GuL86t/view?usp=sharing)
+[Watch the StudyVerse Demo](https://drive.google.com/file/d/1wokJqk3TrPIPupX-z9UGCeqkRnIXAFrR/view?usp=sharing)
 
 
 ## Technologies
@@ -58,22 +70,14 @@ Author: Anna Magdalena Bustowska
 - Network and API errors are handled with user-friendly error messages.
 
 
-## Known Issues
-
-- An Exam created from the Task Screen may open as a Task instead of an Exam.
-- Some screens still have loading/transition behavior that could be smoother.
-- Some UI elements and screens need further color and contrast refinement.
-  
-
-
 ## Future Improvements
 
 - Add a Date Picker for Tasks and Exams instead of manual date input.
 - Add database migration support for future database schema changes and app updates.
-- Improve the visual design of Lecture Cards and expand the Timetable to include weekends.
+- Improve the visual design of the app and expand the Timetable to include weekends.
+- Improve loading/transition behavior for a smoother experience. 
 - Introduce a clickable Profile view with Settings.
 - Add Dark/Light Theme selection and potentially additional visual themes.
 - Add Password Reset functionality.
 - Explore linking Notes, Tasks and Lectures through hashtags or related entities.
 - Further improve loading states, animations and screen transitions.
-- Refine and centralize the color palette and allow users to choose different accent themes and wallpapers.
