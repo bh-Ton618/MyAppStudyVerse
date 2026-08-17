@@ -2,7 +2,6 @@ package com.example.myappstudyverse.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -60,10 +59,13 @@ import androidx.navigation.NavHostController
 import com.example.myappstudyverse.data.local.DatabaseProvider
 import com.example.myappstudyverse.data.local.LectureRepository
 import com.example.myappstudyverse.ui.components.AppFilterChip
-import com.example.myappstudyverse.ui.theme.FilterChipSurface
-import com.example.myappstudyverse.ui.theme.GridLine
+import com.example.myappstudyverse.ui.theme.Gridline
 import com.example.myappstudyverse.ui.theme.LectureCardSurface
-import com.example.myappstudyverse.ui.theme.TextSecondary
+import com.example.myappstudyverse.ui.theme.LighterGold
+import com.example.myappstudyverse.ui.theme.NavigationSurface
+import com.example.myappstudyverse.ui.theme.OffWhite1
+import com.example.myappstudyverse.ui.theme.OffWhite2
+import com.example.myappstudyverse.ui.theme.PurplePrimary
 import com.example.myappstudyverse.ui.viewmodel.LectureViewModel
 import com.example.myappstudyverse.ui.viewmodel.LectureViewModelFactory
 import java.time.LocalDate
@@ -133,7 +135,8 @@ private fun mapTimeToRow(time: String, hours: List<String>): Int {
 }
 
 
-// Formats lecture times for compact display inside lecture cards.
+
+// Formats lecture times for display inside lecture cards.
 private fun formatLectureTime(
     start: String,
     end: String,
@@ -141,9 +144,25 @@ private fun formatLectureTime(
 ): String {
 
     if (isDayView) {
-        return "$start-$end"
+
+        val formattedStart = if (start.contains(":")) {
+            start
+        } else {
+            start.replace(" AM", ":00 AM")
+                .replace(" PM", ":00 PM")
+        }
+
+        val formattedEnd = if (end.contains(":")) {
+            end
+        } else {
+            end.replace(" AM", ":00 AM")
+                .replace(" PM", ":00 PM")
+        }
+
+        return "$formattedStart-$formattedEnd"
     }
 
+    // Week View keeps the shorter time format.
     val startTime = start.substringBefore(" ").trimStart('0')
     val endTime = end.substringBefore(" ").trimStart('0')
 
@@ -248,7 +267,7 @@ fun LectureScreen(navController: NavHostController) {
                 onClick = { navController.navigate("lectureDetail/new") },
                 modifier = Modifier.offset(y = 24.dp),
                 shape = CircleShape,
-                containerColor = Color(0xFFA78BFA)
+                containerColor = PurplePrimary
             ) {
                 Icon(
                     imageVector = Icons.Default.CoPresent,
@@ -277,7 +296,7 @@ fun LectureScreen(navController: NavHostController) {
             Text(
                 text = "Timetable", fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextSecondary
+                color = OffWhite1
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -414,7 +433,7 @@ fun WeekView(
                             text = hour,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = TextSecondary
+                            color = OffWhite2
                         )
                         Spacer(modifier = Modifier.height(0.dp))
                     }
@@ -431,9 +450,9 @@ fun WeekView(
                             HorizontalDivider(
                                 thickness = 1.dp,
                                 color = if (hour.contains(":30"))
-                                    GridLine.copy(alpha = 0.5f)
+                                    Gridline.copy(alpha = 0.03f)
                                 else
-                                    GridLine
+                                    Gridline.copy(alpha = 0.05f)
                             )
                             Spacer(modifier = Modifier.height(23.5.dp))
                         }
@@ -454,7 +473,7 @@ fun WeekView(
                                             .align(Alignment.CenterEnd)
                                             .fillMaxHeight(),
                                         thickness = 1.dp,
-                                        color = GridLine
+                                        color = Gridline.copy(alpha = 0.05f)
                                     )
 
                                 }
@@ -521,6 +540,7 @@ fun DayView(
                 null -> "It's the weekend ✨"
             },
             style = MaterialTheme.typography.headlineSmall,
+            color = OffWhite2,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -543,9 +563,9 @@ fun DayView(
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.SemiBold,
                             color = if (hour.contains(":30"))
-                                Color.LightGray
+                                OffWhite2
                             else
-                                Color.Unspecified
+                                OffWhite1
                         )
                     }
                 }
@@ -566,9 +586,9 @@ fun DayView(
                             HorizontalDivider(
                                 modifier = Modifier.align(Alignment.TopCenter),
                                 color = if (hour.contains(":30"))
-                                    Color.LightGray.copy(alpha = 0.5f)
+                                    Gridline.copy(alpha = 0.05f)
                                 else
-                                    MaterialTheme.colorScheme.outlineVariant
+                                    Gridline.copy(alpha = 0.08f)
                             )
                         }
                     }
@@ -610,8 +630,8 @@ fun DayChip(day: String, date: String, isSelected: Boolean, onClick: () -> Unit)
         modifier = Modifier
             .size(width = 42.dp, height = 64.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background( if (isSelected) FilterChipSurface else Color.Transparent)
-            .clickable { onClick() }, contentAlignment = Alignment.Center
+            .background( if (isSelected) LighterGold else Color.Transparent),
+            contentAlignment = Alignment.Center
     )
     {
         Column(
@@ -619,9 +639,9 @@ fun DayChip(day: String, date: String, isSelected: Boolean, onClick: () -> Unit)
             verticalArrangement = Arrangement.Center
         ) {
 
-            Text(text = day, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+            Text(text = day, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = OffWhite1)
             Spacer(modifier = Modifier.width(4.dp))
-            Text(text = date, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(text = date, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = OffWhite1)
         }
 
     }
@@ -672,6 +692,7 @@ fun LectureCard(
             Text(
                 text = lecture.title,
                 fontWeight = FontWeight.Bold,
+                color = OffWhite1,
                 fontSize = lectureTitleFontSize,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -687,7 +708,8 @@ fun LectureCard(
                     end = lecture.endTime,
                     isDayView = isDayView
                 ),
-                fontSize = 12.sp
+                fontSize = 12.sp,
+                color = OffWhite1
             )
         }
 
@@ -703,8 +725,9 @@ fun LectureCard(
             shape = RoundedCornerShape(18.dp),
             border = BorderStroke(
                 width = 1.dp,
-                color = Color(0xFFA78BFA)
-            )
+                OffWhite1.copy(alpha = 0.4f)
+            ),
+            containerColor = NavigationSurface
         ) {
             DropdownMenuItem(
                 modifier = Modifier
@@ -713,14 +736,14 @@ fun LectureCard(
                 text = {
                     Text(
                         text = "Delete",
-                        color = Color.DarkGray
+                        color = OffWhite1
                     )
                 },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Delete",
-                        tint = Color(0xFFA78BFA)
+                        tint = PurplePrimary
                     )
                 },
                 onClick = {

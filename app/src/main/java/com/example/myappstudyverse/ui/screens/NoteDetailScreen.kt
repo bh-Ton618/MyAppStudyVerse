@@ -52,7 +52,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.myappstudyverse.data.local.DatabaseProvider
 import com.example.myappstudyverse.data.local.NoteRepository
-import com.example.myappstudyverse.ui.theme.TextPrimary
+import com.example.myappstudyverse.ui.theme.Gold
+import com.example.myappstudyverse.ui.theme.NavigationSurface
+import com.example.myappstudyverse.ui.theme.OffWhite1
+import com.example.myappstudyverse.ui.theme.OffWhite2
+import com.example.myappstudyverse.ui.theme.PurplePrimary
+import com.example.myappstudyverse.ui.theme.TextSecondary
+import com.example.myappstudyverse.ui.theme.textFieldInputHint
 import com.example.myappstudyverse.ui.viewmodel.NoteViewModel
 import com.example.myappstudyverse.ui.viewmodel.NoteViewModelFactory
 import kotlinx.coroutines.launch
@@ -128,18 +134,18 @@ fun NoteDetailScreen(navController: NavHostController, noteId: Int?) {
                             .offset(y = 80.dp)
                             .border(
                                 width = 0.5.dp,
-                                color = Color(0xFF7C4DFF),
+                                color = OffWhite1.copy(alpha = 0.4f),
                                 shape = RoundedCornerShape(14.dp)
                             )
                             .background(
-                                color = Color.White,
+                                color = NavigationSurface,
                                 shape = RoundedCornerShape(14.dp)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = snackbarData.visuals.message,
-                            color = Color(0xFF7C4DFF)
+                            color = OffWhite2
                         )
                     }
                 }
@@ -183,11 +189,11 @@ fun NoteDetailScreen(navController: NavHostController, noteId: Int?) {
                         Icon(
                             imageVector = Icons.Outlined.Delete,
                             contentDescription = "Delete",
-                            tint = TextPrimary
+                            tint = OffWhite1
                         )
                         Text(
                             text = "Delete",
-                            color = TextPrimary
+                            color = OffWhite1
                         )
                     }
 
@@ -229,11 +235,11 @@ fun NoteDetailScreen(navController: NavHostController, noteId: Int?) {
                         Icon(
                             imageVector = Icons.Outlined.Check,
                             contentDescription = "Save",
-                            tint = Color.White
+                            tint = OffWhite1
                         )
                         Text(
                             text = "Save",
-                            color = Color.White
+                            color = OffWhite1
                         )
                     }
                 }
@@ -306,13 +312,13 @@ fun NoteDetailScreen(navController: NavHostController, noteId: Int?) {
                     modifier = Modifier
                         .size(40.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFF0EBFF)),
+                        .background(PurplePrimary.copy(alpha = 0.2f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.NoteAlt,
                         contentDescription = "Note",
-                        tint = Color(0xFFA78BFA),
+                        tint = PurplePrimary.copy(alpha = 0.9f),
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -323,7 +329,7 @@ fun NoteDetailScreen(navController: NavHostController, noteId: Int?) {
                     text = if (isNewNote) "NEW NOTE" else "NOTE",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFA78BFA)
+                    color = PurplePrimary.copy(alpha = 0.8f)
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
@@ -336,7 +342,7 @@ fun NoteDetailScreen(navController: NavHostController, noteId: Int?) {
                     Icon(
                         imageVector = Icons.Outlined.PushPin,
                         contentDescription = if (isPinned) "Unpin note" else "Pin note",
-                        tint = if (isPinned) Color(0xFFA78BFA) else Color.LightGray,
+                        tint = if (isPinned) Gold else Color.LightGray,
                         modifier = Modifier
                             .size(22.dp)
                             .rotate(35f)
@@ -354,7 +360,8 @@ fun NoteDetailScreen(navController: NavHostController, noteId: Int?) {
                 modifier = Modifier.fillMaxWidth(),
                 textStyle = LocalTextStyle.current.copy(
                     fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = OffWhite1
                 ),
                 singleLine = true,
                 decorationBox = { innerTextField ->
@@ -363,7 +370,7 @@ fun NoteDetailScreen(navController: NavHostController, noteId: Int?) {
                             text = "Title",
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.LightGray
+                            color = textFieldInputHint
                         )
                     }
                     innerTextField()
@@ -386,7 +393,7 @@ fun NoteDetailScreen(navController: NavHostController, noteId: Int?) {
                             ).format(java.util.Date(existingNote.createdDate))
                         }",
                         fontSize = 14.sp,
-                        color = Color.Gray
+                        color = TextSecondary
                     )
                 }
             }
@@ -402,14 +409,15 @@ fun NoteDetailScreen(navController: NavHostController, noteId: Int?) {
                     .fillMaxWidth()
                     .weight(1f),
                 textStyle = LocalTextStyle.current.copy(
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    color = OffWhite2
                 ),
                 decorationBox = { innerTextField ->
                     if (noteText.isEmpty() && isNewNote) {
                         Text(
                             text = "Write your note here...",
-                            fontSize = 16.sp,
-                            color = Color.LightGray
+                            fontSize = 18.sp,
+                            color = textFieldInputHint
                         )
                     }
                     innerTextField()

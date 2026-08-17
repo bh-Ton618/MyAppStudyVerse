@@ -1,8 +1,11 @@
 package com.example.myappstudyverse.ui.screens
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +26,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material.icons.outlined.CoPresent
 import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material.icons.outlined.School
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -30,7 +34,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,18 +44,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.myappstudyverse.R
 import com.example.myappstudyverse.data.local.DatabaseProvider
 import com.example.myappstudyverse.data.local.LectureRepository
 import com.example.myappstudyverse.data.local.TaskRepository
+import com.example.myappstudyverse.ui.theme.Gold
+import com.example.myappstudyverse.ui.theme.Green
+import com.example.myappstudyverse.ui.theme.Gridline
+import com.example.myappstudyverse.ui.theme.Gridline2
+import com.example.myappstudyverse.ui.theme.NavigationSurface
+import com.example.myappstudyverse.ui.theme.OffWhite1
+import com.example.myappstudyverse.ui.theme.OffWhite2
 import com.example.myappstudyverse.ui.theme.PurplePrimary
-import com.example.myappstudyverse.ui.theme.SpaceInput
+import com.example.myappstudyverse.ui.theme.PurpleSecondary
+import com.example.myappstudyverse.ui.theme.Rose
 import com.example.myappstudyverse.ui.theme.SpaceSurface
-import com.example.myappstudyverse.ui.theme.TextPrimary
 import com.example.myappstudyverse.ui.theme.TextSecondary
 import com.example.myappstudyverse.ui.viewmodel.LectureViewModel
 import com.example.myappstudyverse.ui.viewmodel.LectureViewModelFactory
@@ -62,7 +76,6 @@ import com.google.firebase.auth.FirebaseAuth
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
-
 
 // Main dashboard screen providing quick access to app's core features.
 @Composable
@@ -98,13 +111,10 @@ fun DashboardScreen(
         factory = LectureViewModelFactory(lectureRepository)
     )
 
-    LaunchedEffect(Unit) {
-        taskViewModel.loadTasks()
-        lectureViewModel.loadLectures()
-    }
-
     val tasks by taskViewModel.tasks.collectAsState()
     val lectures by lectureViewModel.lectures.collectAsState()
+
+
 
     Scaffold(
         // Floating action button reserved for creating future content (currently placeholder)
@@ -125,7 +135,7 @@ fun DashboardScreen(
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add",
-                        tint = TextPrimary
+                        tint = OffWhite1
                     )
                 }
 
@@ -141,10 +151,10 @@ fun DashboardScreen(
                             Row(
                                 modifier = Modifier
                                     .clip(CircleShape)
-                                    .background(SpaceInput)
+                                    .background(NavigationSurface)
                                     .border(
                                         width = 1.dp,
-                                        color = PurplePrimary,
+                                        color = PurplePrimary.copy(alpha = 0.3f),
                                         shape = RoundedCornerShape(50.dp)
                                     )
                                     .clickable {
@@ -164,17 +174,17 @@ fun DashboardScreen(
                                 Text(
                                     text = "New Task",
                                     fontWeight = FontWeight.Medium,
-                                    color = TextPrimary
+                                    color = OffWhite2
                                 )
                             }
 
                             Row(
                                 modifier = Modifier
                                     .clip(CircleShape)
-                                    .background(SpaceInput)
+                                    .background(NavigationSurface)
                                     .border(
                                         width = 1.dp,
-                                        color = PurplePrimary,
+                                        color = PurplePrimary.copy(alpha = 0.3f),
                                         shape = RoundedCornerShape(50.dp)
                                     )
                                     .clickable {
@@ -194,17 +204,17 @@ fun DashboardScreen(
                                 Text(
                                     text = "New Lecture",
                                     fontWeight = FontWeight.Medium,
-                                    color = TextPrimary
+                                    color = OffWhite2
                                 )
                             }
 
                             Row(
                                 modifier = Modifier
                                     .clip(CircleShape)
-                                    .background(SpaceInput)
+                                    .background(NavigationSurface)
                                     .border(
                                         width = 1.dp,
-                                        color = PurplePrimary,
+                                        color = PurplePrimary.copy(alpha = 0.3f),
                                         shape = RoundedCornerShape(50.dp)
                                     )
                                     .clickable {
@@ -224,17 +234,17 @@ fun DashboardScreen(
                                 Text(
                                     text = "New Exam",
                                     fontWeight = FontWeight.Medium,
-                                    color = TextPrimary
+                                    color = OffWhite2
                                 )
                             }
 
                             Row(
                                 modifier = Modifier
                                     .clip(CircleShape)
-                                    .background(SpaceInput)
+                                    .background(NavigationSurface)
                                     .border(
                                         width = 1.dp,
-                                        color = PurplePrimary,
+                                        color = PurplePrimary.copy(alpha = 0.3f),
                                         shape = RoundedCornerShape(50.dp)
                                     )
                                     .clickable {
@@ -254,7 +264,7 @@ fun DashboardScreen(
                                 Text(
                                     text = "New Note",
                                     fontWeight = FontWeight.Medium,
-                                    color = TextPrimary
+                                    color = OffWhite2
                                 )
                             }
                         }
@@ -322,7 +332,7 @@ fun GreetingSection() {
             Column(modifier = Modifier.weight(1f)) {
 
                 Text(
-                    text = "Welcome back, $username \uD83D\uDC4B"
+                    text = "Welcome back, $username \uD83D\uDC4B", color = OffWhite2
                 )
 
                 val currentDate = LocalDate.now()
@@ -330,23 +340,26 @@ fun GreetingSection() {
                     currentDate.format(DateTimeFormatter.ofPattern("EEEE, MMMM d"))
 
                 Text(
-                    text = formattedDate
+                    text = formattedDate, color = OffWhite2
                 )
             }
 
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .clickable {
+                    .clip(CircleShape)
+                    .clickable(indication = null,
+                       interactionSource = remember { MutableInteractionSource()}
+                    ) {
                         // TODO: Navigate to profile.
                     }
-                    .clip(CircleShape)
-                    .background(SpaceInput),
+                    .background(color = NavigationSurface)
+                    .border(width = 1.dp, color = Gridline2, shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = username.first().uppercase(),
-                    color = TextPrimary
+                    color = OffWhite2
                 )
             }
         }
@@ -377,55 +390,50 @@ fun MotivationSection(modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(170.dp),
+            .height(170.dp)
+            .clip(RoundedCornerShape(18.dp)),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
             containerColor = SpaceSurface
-        )
+        ),
+        border = BorderStroke(1.dp, Gridline)
     ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.Start
+        Box(modifier = Modifier.fillMaxSize()) {
+            Image(
+                painter = painterResource(id = R.drawable.motivation_wallpaper2),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Daily Motivation",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = PurplePrimary
-                )
+                Column(
+                    modifier = Modifier
+                        .width(235.dp)
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Text(
+                        text = "Daily Motivation",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PurplePrimary
+                    )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                Text(
-                    text = dailyQuote,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .padding(end = 16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                RocketIcon()
+                    Text(
+                        text = dailyQuote,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = OffWhite2
+                    )
+                }
             }
         }
     }
-}
-
-@Composable
-fun RocketIcon() {
-    Text(
-        text = "\uD83D\uDE80",
-        fontSize = 40.sp
-    )
 }
 
 
@@ -468,7 +476,8 @@ fun TodayOverviewSection(
     Column {
         Text(
             text = "Today's Overview",
-            color = TextPrimary
+            color = OffWhite2,
+            fontWeight = FontWeight.Bold
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -476,7 +485,7 @@ fun TodayOverviewSection(
         Row {
             OverViewCard(
                 modifier = Modifier.weight(1f),
-                icon = "\uD83D\uDCCB",
+                icon = Icons.Outlined.CheckBox,
                 number = todayTasks.toString(),
                 title = if (todayTasks == 1) "Task" else "Tasks"
             )
@@ -485,7 +494,7 @@ fun TodayOverviewSection(
 
             OverViewCard(
                 modifier = Modifier.weight(1f),
-                icon = "\uD83D\uDCDA",
+                icon = Icons.Outlined.CoPresent,
                 number = todayLectures.toString(),
                 title = if (todayLectures == 1) "Lecture" else "Lectures"
             )
@@ -494,7 +503,7 @@ fun TodayOverviewSection(
 
             OverViewCard(
                 modifier = Modifier.weight(1f),
-                icon = "\uD83D\uDCDD",
+                icon = Icons.Outlined.School,
                 number = todayExams.toString(),
                 title = if (todayExams == 1) "Exam" else "Exams"
             )
@@ -507,7 +516,7 @@ fun TodayOverviewSection(
 @Composable
 fun OverViewCard(
     modifier: Modifier = Modifier,
-    icon: String,
+    icon: ImageVector,
     number: String,
     title: String
 ) {
@@ -515,7 +524,8 @@ fun OverViewCard(
         modifier = modifier.height(120.dp),
         colors = CardDefaults.cardColors(
             containerColor = SpaceSurface
-        )
+        ),
+        border = BorderStroke(1.dp, Gridline)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -524,22 +534,24 @@ fun OverViewCard(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(Color.Gray),
+                    .background(PurplePrimary.copy(alpha = 0.25f)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = icon,
-                    fontSize = 20.sp
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = PurpleSecondary,
+                    modifier = Modifier.size(22.dp)
                 )
             }
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text(text = number)
+            Text(text = number, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = OffWhite2)
 
             Spacer(modifier = Modifier.height(2.dp))
 
-            Text(text = title)
+            Text(text = title, color = OffWhite2)
         }
     }
 }
@@ -619,7 +631,9 @@ fun UpComingSection(
     Column {
         Text(
             text = "Upcoming",
-            color = TextPrimary
+            color = OffWhite2,
+            fontWeight = FontWeight.Bold
+
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -627,7 +641,8 @@ fun UpComingSection(
         UpcomingCard(
             title = nextTask?.first?.title ?: "No missions ✨",
             subtitle = nextTask?.first?.dueDate ?: "Your mission log is clear.",
-            icon = "\uD83D\uDCD8"
+            icon = Icons.Outlined.CheckBox,
+            color = Rose
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -636,7 +651,8 @@ fun UpComingSection(
             title = nextLecture?.first?.title ?: "No Lectures today. ✨",
             subtitle = nextLecture?.second?.format(dateFormatter)
                 ?: "Enjoy the empty space",
-            icon = "\uD83E\uDEA2"
+            icon = Icons.Outlined.CoPresent,
+            color = Green
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -644,7 +660,8 @@ fun UpComingSection(
         UpcomingCard(
             title = nextExam?.first?.title ?: "Exam free zone ✨",
             subtitle = nextExam?.first?.dueDate ?: "No tests on the radar.",
-            icon = "\uD83D\uDCDD"
+            icon = Icons.Outlined.School,
+            color = Gold
         )
     }
 }
@@ -655,9 +672,12 @@ fun UpComingSection(
 fun UpcomingCard(
     title: String,
     subtitle: String,
-    icon: String
+    icon: ImageVector,
+    color: Color
 ) {
     Card(
+        modifier = Modifier,
+        border = BorderStroke(1.dp, Gridline),
         colors = CardDefaults.cardColors(
             containerColor = SpaceSurface
         )
@@ -673,12 +693,14 @@ fun UpcomingCard(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color.Gray),
+                        .background(color.copy(alpha = 0.25f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = icon,
-                        fontSize = 24.sp
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = color,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
 

@@ -51,8 +51,9 @@ import coil3.compose.AsyncImage
 import com.example.myappstudyverse.BuildConfig
 import com.example.myappstudyverse.model.ApodResponse
 import com.example.myappstudyverse.network.RetrofitInstance
-import com.example.myappstudyverse.ui.theme.TextPrimary
-import com.example.myappstudyverse.ui.theme.TextSecondary
+import com.example.myappstudyverse.ui.theme.Gold
+import com.example.myappstudyverse.ui.theme.OffWhite2
+import com.example.myappstudyverse.ui.theme.PurplePrimary
 import retrofit2.HttpException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -121,7 +122,7 @@ fun SpaceScreen(navController: NavHostController) {
                     .align(Alignment.TopCenter)
                     .padding(top = 10.dp)
                     .size(14.dp),
-                tint = Color(0XFF7C4DFF)
+                tint = Gold
             )
 
             Row(
@@ -147,7 +148,7 @@ fun SpaceScreen(navController: NavHostController) {
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,
                     letterSpacing = 2.sp,
-                    color = Color(0XFF7C4DFF)
+                    color = PurplePrimary.copy(alpha = 0.8f)
                 )
 
                 Spacer(modifier = Modifier.size(48.dp))
@@ -244,7 +245,7 @@ fun SpaceScreen(navController: NavHostController) {
                     text = loadedApodResponse.title,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
+                    color = OffWhite2,
                     maxLines = 2
                 )
                 Spacer(modifier = Modifier.height(6.dp))
@@ -252,16 +253,16 @@ fun SpaceScreen(navController: NavHostController) {
                     text = formattedDate,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0XFF7C4DFF)
+                    color = PurplePrimary.copy(alpha = 0.7f)
                 )
                 loadedApodResponse.copyright?.let { copyright ->
                     Spacer(modifier = Modifier.height(2.dp))
-                    Text(text = "© $copyright", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(text = "© $copyright", maxLines = 1, overflow = TextOverflow.Ellipsis, color = OffWhite2)
                 }
                 Spacer(modifier = Modifier.height(12.dp))
                 HorizontalDivider(thickness = 1.dp, color = Color.LightGray.copy(alpha = 0.5f))
                 Spacer(modifier = Modifier.height(20.dp))
-                Text(text = formattedExplanation, color = TextSecondary)
+                Text(text = formattedExplanation, color = OffWhite2)
 
                 Spacer(modifier = Modifier.height(28.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
@@ -276,8 +277,8 @@ fun SpaceScreen(navController: NavHostController) {
                             context.startActivity(intent)
                         },
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF7C4DFF)),
-                        border = BorderStroke(1.dp, Color(0xFF7C4DFF))
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = PurplePrimary.copy(alpha = 0.7f)),
+                        border = BorderStroke(1.dp, PurplePrimary.copy(alpha = 0.8f))
                     ) {
                         Text("Learn More on NASA")
                         Spacer(modifier = Modifier.height(6.dp))

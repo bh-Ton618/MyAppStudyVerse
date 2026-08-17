@@ -1,5 +1,7 @@
 package com.example.myappstudyverse.ui.screens
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
@@ -34,7 +37,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -57,11 +60,19 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.myappstudyverse.data.local.DatabaseProvider
 import com.example.myappstudyverse.data.local.NoteRepository
+import com.example.myappstudyverse.ui.theme.Gold
+import com.example.myappstudyverse.ui.theme.Gridline
+import com.example.myappstudyverse.ui.theme.NavigationSurface
+import com.example.myappstudyverse.ui.theme.OffWhite1
+import com.example.myappstudyverse.ui.theme.OffWhite2
+import com.example.myappstudyverse.ui.theme.PurplePrimary
 import com.example.myappstudyverse.ui.theme.SpaceSurface
-import com.example.myappstudyverse.ui.theme.TextPrimary
-import com.example.myappstudyverse.ui.theme.TextSecondary
+import com.example.myappstudyverse.ui.theme.textFieldInputHint
 import com.example.myappstudyverse.ui.viewmodel.NoteViewModel
 import com.example.myappstudyverse.ui.viewmodel.NoteViewModelFactory
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 data class Note(
@@ -148,7 +159,7 @@ fun NoteScreen(navController: NavHostController) {
                 onClick = { navController.navigate("noteDetail/new") },
                 modifier = Modifier.offset(y = 24.dp),
                 shape = CircleShape,
-                containerColor = Color(0xFFA78BFA)
+                containerColor = PurplePrimary
             ) {
                 Icon(
                     imageVector = Icons.Outlined.NoteAlt,
@@ -184,7 +195,7 @@ fun NoteScreen(navController: NavHostController) {
                     text = "My Notes",
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary
+                    color = OffWhite1
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(
@@ -197,7 +208,8 @@ fun NoteScreen(navController: NavHostController) {
                                 .size(30.dp)
                                 .offset(y = 2.dp),
                             imageVector = Icons.Outlined.Search,
-                            contentDescription = "Search"
+                            contentDescription = "Search",
+                            tint = OffWhite2
                         )
 
                     }
@@ -212,38 +224,41 @@ fun NoteScreen(navController: NavHostController) {
                                 .size(30.dp)
                                 .offset(y = 2.dp),
                             imageVector = Icons.Outlined.FilterList,
-                            contentDescription = "Sort"
+                            contentDescription = "Sort",
+                            tint = OffWhite2
                         )
                     }
                     DropdownMenu(
                         expanded = isFilterMenuExpanded,
                         onDismissRequest = {
                             isFilterMenuExpanded = false
-                        }
+                        },
+                        containerColor = NavigationSurface,
+                        border = BorderStroke(width = 1.dp, color = Gridline)
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Newest created") },
+                            text = { Text("Newest created", color = OffWhite2) },
                             onClick = {
                                 selectedSortOption = NoteSortOption.NEWEST
                                 isFilterMenuExpanded = false
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Oldest created") },
+                            text = { Text("Oldest created", color = OffWhite2) },
                             onClick = {
                                 selectedSortOption = NoteSortOption.OLDEST
                                 isFilterMenuExpanded = false
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Title (A-Z)") },
+                            text = { Text("Title (A-Z)", color = OffWhite2) },
                             onClick = {
                                 selectedSortOption = NoteSortOption.TITLE_ASC
                                 isFilterMenuExpanded = false
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Title (Z-A)") },
+                            text = { Text("Title (Z-A)", color = OffWhite2) },
                             onClick = {
                                 selectedSortOption = NoteSortOption.TITLE_DESC
                                 isFilterMenuExpanded = false
@@ -256,15 +271,39 @@ fun NoteScreen(navController: NavHostController) {
 
             // Displays the search when search mode is enabled.
             if (isSearchOpen) {
-                OutlinedTextField(
+                BasicTextField(
                     value = searchText,
-                    onValueChange = { newText -> searchText = newText },
+                    onValueChange = { newText ->
+                        searchText = newText
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(18.dp),
-                    placeholder = { Text("Search notes...") },
-                    singleLine = true
+                        .height(50.dp)
+                        .border(
+                            width = 0.4.dp,
+                            color = OffWhite2,
+                            shape = RoundedCornerShape(18.dp)
+                        )
+                        .padding(horizontal = 14.dp),
+                    textStyle = LocalTextStyle.current.copy(
+                        fontSize = 16.sp,
+                        color = OffWhite2
+                    ),
+                    singleLine = true,
+                    decorationBox = { innerTextField ->
+                        Box(
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            if (searchText.isEmpty()) {
+                                Text(
+                                    text = "Search notes...",
+                                    color = textFieldInputHint
+                                )
+                            }
+
+                            innerTextField()
+                        }
+                    }
                 )
             }
 
@@ -286,7 +325,12 @@ fun NoteScreen(navController: NavHostController) {
                     verticalAlignment = Alignment.CenterVertically
                 )
                 {
-                    Text(text = "Pinned", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        text = "Pinned",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = OffWhite1
+                    )
                     Icon(
                         imageVector =
                             if (isPinnedSectionExpanded)
@@ -333,7 +377,8 @@ fun NoteScreen(navController: NavHostController) {
                         Text(
                             text = "Notes",
                             fontSize = 20.sp,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
+                            color = OffWhite1
                         )
                     }
                 }
@@ -383,7 +428,8 @@ fun NoteCard(
                     isContextMenuExpanded = true
                 }
             ),
-        colors = CardDefaults.cardColors(containerColor = SpaceSurface)
+        colors = CardDefaults.cardColors(containerColor = SpaceSurface),
+        border = BorderStroke(width = 1.dp, color = Gridline)
     ) {
         Box {
             Row(
@@ -396,7 +442,7 @@ fun NoteCard(
                     Icon(
                         imageVector = Icons.Default.PushPin,
                         contentDescription = "Pinned Note",
-                        tint = Color(0xFFA78BFA),
+                        tint = Gold,
                         modifier = Modifier
                             .size(18.dp)
                             .rotate(20f)
@@ -408,12 +454,15 @@ fun NoteCard(
                         text = note.title,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
-                        color = TextPrimary
+                        color = OffWhite2
                     )
                     Text(
-                        text = note.createdDate.toString(),
+                        text = SimpleDateFormat(
+                            "dd.MM.yyyy, HH:mm",
+                            Locale.getDefault()
+                        ).format(Date(note.createdDate)),
                         fontSize = 14.sp,
-                        color = TextSecondary
+                        color = OffWhite2
                     )
                 }
             }
@@ -426,7 +475,12 @@ fun NoteCard(
                     x = (-40).dp,
                     y = (-120).dp
                 ),
-                shape = RoundedCornerShape(20.dp)
+                shape = RoundedCornerShape(18.dp),
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = OffWhite1.copy(alpha = 0.4f)
+                ),
+                containerColor = NavigationSurface
             ) {
                 Row(
                     modifier = Modifier
@@ -448,7 +502,8 @@ fun NoteCard(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = if (note.isPinned) "Unpin" else "Pin"
+                        text = if (note.isPinned) "Unpin" else "Pin",
+                        color = OffWhite2
                     )
                 }
                 Row(
@@ -471,7 +526,8 @@ fun NoteCard(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "Delete"
+                        text = "Delete",
+                        color = OffWhite2
                     )
                 }
             }

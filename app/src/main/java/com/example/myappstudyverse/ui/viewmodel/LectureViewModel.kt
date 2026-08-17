@@ -17,6 +17,11 @@ class LectureViewModel(
     private val _lectures = MutableStateFlow<List<Lecture>>(emptyList())
     val lectures: StateFlow<List<Lecture>> = _lectures
 
+    // Loads lectures when the ViewModel is created.
+    init {
+        loadLectures()
+    }
+
     fun loadLectures() {
         viewModelScope.launch {
             _lectures.value = repository.getAllLectures()

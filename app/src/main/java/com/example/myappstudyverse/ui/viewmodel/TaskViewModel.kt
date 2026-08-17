@@ -18,6 +18,11 @@ class TaskViewModel(
     private val _tasks = MutableStateFlow<List<Task>>(emptyList())
     val tasks: StateFlow<List<Task>> = _tasks
 
+    // Loads tasks when the ViewModel is created.
+    init {
+        loadTasks()
+    }
+
     fun loadTasks() {
         viewModelScope.launch {
             _tasks.value = repository.getAllTasks()

@@ -18,12 +18,12 @@ private val LightColorScheme = lightColorScheme(
     background = SpaceBackground,
     surface = SpaceSurface,
 
-    onPrimary = TextPrimary,
-    onSecondary = TextPrimary,
-    onTertiary = TextPrimary,
+    onPrimary = OffWhite1,
+    onSecondary = OffWhite1,
+    onTertiary = OffWhite1,
 
-    onBackground = TextPrimary,
-    onSurface = TextPrimary
+    onBackground = OffWhite1,
+    onSurface = OffWhite1
 )
 
 private val DarkColorScheme = darkColorScheme(
@@ -34,12 +34,12 @@ private val DarkColorScheme = darkColorScheme(
     background = SpaceBackground,
     surface = SpaceSurface,
 
-    onPrimary = TextPrimary,
-    onSecondary = TextPrimary,
-    onTertiary = TextPrimary,
+    onPrimary = OffWhite1,
+    onSecondary = OffWhite1,
+    onTertiary = OffWhite1,
 
-    onBackground = TextPrimary,
-    onSurface = TextPrimary
+    onBackground = OffWhite1,
+    onSurface = OffWhite1
 )
 
 @Composable

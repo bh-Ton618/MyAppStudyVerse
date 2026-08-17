@@ -1,6 +1,7 @@
 package com.example.myappstudyverse.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -12,9 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.myappstudyverse.ui.theme.FilterChipSurface
+import com.example.myappstudyverse.ui.theme.Gridline
+import com.example.myappstudyverse.ui.theme.NavigationSurface
+import com.example.myappstudyverse.ui.theme.OffWhite1
 import com.example.myappstudyverse.ui.theme.PurplePrimary
-import com.example.myappstudyverse.ui.theme.TextPrimary
 import com.example.myappstudyverse.ui.theme.TextSecondary
 
 // Reusable filter chip used for selecting filter and view options.
@@ -34,10 +36,11 @@ fun AppFilterChip(
                 color = if (isSelected) {
                     PurplePrimary
                 } else {
-                    FilterChipSurface
+                    NavigationSurface
                 },
                 shape = RoundedCornerShape(50.dp)
             )
+            .border(width = 1.dp, color = Gridline, shape = RoundedCornerShape(50.dp))
             .clickable {
                 onClick()
             },
@@ -48,7 +51,7 @@ fun AppFilterChip(
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
             color = if (isSelected) {
-                TextPrimary
+                OffWhite1
             } else {
                 TextSecondary
             }

@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AssignmentTurnedIn
 import androidx.compose.material.icons.filled.Check
@@ -39,7 +40,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -64,11 +65,14 @@ import androidx.navigation.NavHostController
 import com.example.myappstudyverse.data.local.DatabaseProvider
 import com.example.myappstudyverse.data.local.TaskRepository
 import com.example.myappstudyverse.ui.components.AppFilterChip
+import com.example.myappstudyverse.ui.theme.Gold
+import com.example.myappstudyverse.ui.theme.Gridline
+import com.example.myappstudyverse.ui.theme.NavigationSurface
+import com.example.myappstudyverse.ui.theme.OffWhite1
+import com.example.myappstudyverse.ui.theme.OffWhite2
 import com.example.myappstudyverse.ui.theme.PurplePrimary
-import com.example.myappstudyverse.ui.theme.PurpleSecondary
 import com.example.myappstudyverse.ui.theme.SpaceSurface
-import com.example.myappstudyverse.ui.theme.TextPrimary
-import com.example.myappstudyverse.ui.theme.TextSecondary
+import com.example.myappstudyverse.ui.theme.textFieldInputHint
 import com.example.myappstudyverse.ui.viewmodel.TaskViewModel
 import com.example.myappstudyverse.ui.viewmodel.TaskViewModelFactory
 import java.time.LocalDate
@@ -235,7 +239,7 @@ fun TasksScreen(navController: NavHostController) {
                     Icon(
                         imageVector = Icons.Default.AssignmentTurnedIn,
                         contentDescription = "Add",
-                        tint = TextPrimary
+                        tint = OffWhite1
                     )
                 }
 
@@ -249,10 +253,10 @@ fun TasksScreen(navController: NavHostController) {
                         Row(
                             modifier = Modifier
                                 .clip(CircleShape)
-                                .background(SpaceSurface)
+                                .background(NavigationSurface)
                                 .border(
                                     width = 1.dp,
-                                    color = PurplePrimary,
+                                    color = PurplePrimary.copy(alpha = 0.3f),
                                     shape = RoundedCornerShape(50.dp)
                                 )
                                 .clickable {
@@ -277,17 +281,17 @@ fun TasksScreen(navController: NavHostController) {
                             Text(
                                 text = "New Task",
                                 fontWeight = FontWeight.Medium,
-                                color = TextPrimary
+                                color = OffWhite2
                             )
                         }
 
                         Row(
                             modifier = Modifier
                                 .clip(CircleShape)
-                                .background(SpaceSurface)
+                                .background(NavigationSurface)
                                 .border(
                                     width = 1.dp,
-                                    color = PurplePrimary,
+                                    color = PurplePrimary.copy(alpha = 0.3f),
                                     shape = RoundedCornerShape(50.dp)
                                 )
                                 .clickable {
@@ -312,7 +316,7 @@ fun TasksScreen(navController: NavHostController) {
                             Text(
                                 text = "New Exam",
                                 fontWeight = FontWeight.Medium,
-                                color = TextPrimary
+                                color = OffWhite2
                             )
                         }
                     }
@@ -352,7 +356,7 @@ fun TasksScreen(navController: NavHostController) {
                         text = "My Tasks",
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimary
+                        color = OffWhite1
                     )
 
                     Row(
@@ -370,7 +374,7 @@ fun TasksScreen(navController: NavHostController) {
                                     .offset(y = 2.dp),
                                 imageVector = Icons.Outlined.Search,
                                 contentDescription = "Search",
-                                tint = TextPrimary
+                                tint = OffWhite2
                             )
                         }
 
@@ -385,7 +389,7 @@ fun TasksScreen(navController: NavHostController) {
                                     .offset(y = 2.dp),
                                 imageVector = Icons.Outlined.FilterList,
                                 contentDescription = "Sort",
-                                tint = TextPrimary
+                                tint = OffWhite2
                             )
                         }
 
@@ -393,14 +397,16 @@ fun TasksScreen(navController: NavHostController) {
                             expanded = isFilterMenuExpanded,
                             onDismissRequest = {
                                 isFilterMenuExpanded = false
-                            }
+                            },
+                            containerColor = NavigationSurface,
+                            border = BorderStroke(width = 1.dp, color = Gridline)
                         ) {
 
                             DropdownMenuItem(
                                 text = {
                                     Text(
                                         "Priority",
-                                        color = TextPrimary
+                                        color = OffWhite2
                                     )
                                 },
                                 onClick = {
@@ -413,7 +419,7 @@ fun TasksScreen(navController: NavHostController) {
                                 text = {
                                     Text(
                                         "Due Date",
-                                        color = TextPrimary
+                                        color = OffWhite2
                                     )
                                 },
                                 onClick = {
@@ -426,7 +432,7 @@ fun TasksScreen(navController: NavHostController) {
                                 text = {
                                     Text(
                                         "Title A-Z",
-                                        color = TextPrimary
+                                        color = OffWhite2
                                     )
                                 },
                                 onClick = {
@@ -439,7 +445,7 @@ fun TasksScreen(navController: NavHostController) {
                                 text = {
                                     Text(
                                         "Created Date",
-                                        color = TextPrimary
+                                        color = OffWhite2
                                     )
                                 },
                                 onClick = {
@@ -455,22 +461,39 @@ fun TasksScreen(navController: NavHostController) {
                 // Displays the search field only when search mode is enabled.
                 if (isSearchOpen) {
 
-                    OutlinedTextField(
+                    BasicTextField(
                         value = searchText,
                         onValueChange = { newText ->
                             searchText = newText
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(50.dp),
-                        shape = RoundedCornerShape(18.dp),
-                        placeholder = {
-                            Text(
-                                "Search tasks...",
-                                color = TextSecondary
+                            .height(50.dp)
+                            .border(
+                                width = 0.4.dp,
+                                color = OffWhite2,
+                                shape = RoundedCornerShape(18.dp)
                             )
-                        },
-                        singleLine = true
+                            .padding(horizontal = 14.dp),
+                        textStyle = LocalTextStyle.current.copy(
+                            fontSize = 16.sp,
+                            color = OffWhite2
+                        ),
+                        singleLine = true,
+                        decorationBox = { innerTextField ->
+                            Box(
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                if (searchText.isEmpty()) {
+                                    Text(
+                                        text = "Search notes...",
+                                        color = textFieldInputHint
+                                    )
+                                }
+
+                                innerTextField()
+                            }
+                        }
                     )
                 }
 
@@ -533,7 +556,7 @@ fun TasksScreen(navController: NavHostController) {
                                 taskViewModel.deleteTask(task)
                             },
                             onTaskClick = {
-                                navController.navigate("taskDetail/${task.id}")
+                                navController.navigate("taskDetail/${task.id}?type=${task.type}")
                             }
                         )
                     }
@@ -573,11 +596,11 @@ fun TaskCard(
         mutableStateOf(false)
     }
 
-    val priorityColor = when (task.priority) {
-        Priority.HIGH -> Color(0xFF7C3AED)
-        Priority.MEDIUM -> PurplePrimary
-        Priority.LOW -> PurpleSecondary
-        null -> Color.Transparent
+    val priorityText = when (task.priority) {
+        Priority.HIGH -> "H"
+        Priority.MEDIUM -> "M"
+        Priority.LOW -> "L"
+        null -> ""
     }
 
     Card(
@@ -594,15 +617,9 @@ fun TaskCard(
         colors = androidx.compose.material3.CardDefaults.cardColors(
             containerColor = SpaceSurface
         ),
-        border = if (task.type == TaskType.EXAM) {
-            BorderStroke(
-                width = 1.dp,
-                color = PurpleSecondary
-            )
-        } else {
-            null
-        }
+        border = BorderStroke(width = 1.dp, color = Gridline)
     ) {
+
 
         Row(
             modifier = Modifier
@@ -611,12 +628,12 @@ fun TaskCard(
                 .height(IntrinsicSize.Min)
         ) {
 
-            Box(
+            /*Box(
                 modifier = Modifier
                     .fillMaxHeight()
                     .width(4.dp)
                     .background(priorityColor)
-            )
+            )*/
 
             Row(
                 modifier = Modifier
@@ -641,7 +658,7 @@ fun TaskCard(
                             color = if (task.isDone) {
                                 PurplePrimary
                             } else {
-                                TextPrimary
+                                OffWhite1
                             },
                             shape = CircleShape
                         )
@@ -653,7 +670,7 @@ fun TaskCard(
                         Icon(
                             modifier = Modifier.align(Alignment.Center),
                             imageVector = Icons.Default.Check,
-                            tint = TextPrimary,
+                            tint = OffWhite1,
                             contentDescription = "Task done"
                         )
                     }
@@ -661,29 +678,50 @@ fun TaskCard(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                Column(
-                    modifier = Modifier.weight(1f)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
                 ) {
+                    Column {
 
-                    Text(
-                        text = task.title,
-                        fontWeight = FontWeight.Bold,
-                        color = TextPrimary
-                    )
+                        Text(
+                            text = task.title,
+                            fontWeight = FontWeight.Bold,
+                            color = OffWhite2
+                        )
 
-                    Text(
-                        text = if (task.dueDate.isNotBlank()) {
-                            "Due: ${task.dueDate}"
-                        } else {
-                            " "
-                        },
-                        fontSize = 14.sp,
-                        color = if (task.dueDate.isNotBlank()) {
-                            TextSecondary
-                        } else {
-                            Color.Transparent
+                        Text(
+                            text = if (task.dueDate.isNotBlank()) {
+                                "Due: ${task.dueDate}"
+                            } else {
+                                " "
+                            },
+                            fontSize = 14.sp,
+                            color = if (task.dueDate.isNotBlank()) {
+                                OffWhite2
+                            } else {
+                                Color.Transparent
+                            }
+                        )
+                    }
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Text(
+                            text = priorityText,
+                            color = OffWhite2,
+                            fontSize = 10.sp
+                        )
+                        if (task.type == TaskType.EXAM) {
+                            Text(
+                                text = "EXAM",
+                                color = Gold,
+                                fontSize = 13.sp
+                            )
                         }
-                    )
+                    }
                 }
             }
         }
@@ -700,8 +738,9 @@ fun TaskCard(
             shape = RoundedCornerShape(18.dp),
             border = BorderStroke(
                 width = 1.dp,
-                color = PurpleSecondary
-            )
+                color = OffWhite1.copy(alpha = 0.4f)
+            ),
+            containerColor = NavigationSurface
         ) {
 
             DropdownMenuItem(
@@ -710,7 +749,8 @@ fun TaskCard(
                 text = {
                     Text(
                         text = "Delete",
-                        color = TextPrimary
+                        color = OffWhite2
+                        // TODO: Change color here !
                     )
                 },
 

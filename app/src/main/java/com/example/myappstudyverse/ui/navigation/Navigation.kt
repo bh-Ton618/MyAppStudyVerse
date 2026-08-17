@@ -76,6 +76,11 @@ fun StudyVerseNavigation() {
             composable("notes") {
                 NoteScreen(navController)
             }
+
+            composable(route = "noteDetail/new") {
+                NoteDetailScreen(navController = navController, noteId = null)
+            }
+
             composable(route = "noteDetail/{noteId}") { backStackEntry ->
                 val noteId = backStackEntry.arguments?.getString("noteId")?.toIntOrNull()
                 NoteDetailScreen(
@@ -83,17 +88,17 @@ fun StudyVerseNavigation() {
                     noteId = noteId
                 )
             }
-            composable(route = "noteDetail/new") {
-                NoteDetailScreen(navController = navController, noteId = null)
-            }
 
-            composable(route = "taskDetail/{taskId}") { backStackEntry ->
+            composable(route = "taskDetail/{taskId}?type={type}") { backStackEntry ->
                 val taskId = backStackEntry.arguments?.getString("taskId")?.toIntOrNull()
+                val taskType = backStackEntry.arguments?.getString("type")
                 TaskDetailScreen(
                     navController = navController,
-                    taskId = taskId, taskType = TaskType.TASK
+                    taskId = taskId,
+                    taskType = if (taskType == "EXAM") TaskType.EXAM else TaskType.TASK
                 )
             }
+
             composable(route = "taskDetail/new?type={type}") { backStackEntry ->
                 val taskType = backStackEntry.arguments?.getString("type")
                 TaskDetailScreen(

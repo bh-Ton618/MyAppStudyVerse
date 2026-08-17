@@ -1,6 +1,7 @@
 package com.example.myappstudyverse.ui.screens
 
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -33,6 +34,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -41,6 +44,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,14 +60,17 @@ import androidx.navigation.NavHostController
 import com.example.myappstudyverse.data.local.DatabaseProvider
 import com.example.myappstudyverse.data.local.LectureRepository
 import com.example.myappstudyverse.ui.components.AppFilterChip
-import com.example.myappstudyverse.ui.theme.InputFieldBackground
-import com.example.myappstudyverse.ui.theme.InputFieldBorder
-import com.example.myappstudyverse.ui.theme.PurpleSecondary
+import com.example.myappstudyverse.ui.theme.Green
+import com.example.myappstudyverse.ui.theme.Gridline
+import com.example.myappstudyverse.ui.theme.NavigationSurface
+import com.example.myappstudyverse.ui.theme.OffWhite1
+import com.example.myappstudyverse.ui.theme.OffWhite2
 import com.example.myappstudyverse.ui.theme.SpaceSurface
-import com.example.myappstudyverse.ui.theme.TextPrimary
 import com.example.myappstudyverse.ui.theme.TextSecondary
+import com.example.myappstudyverse.ui.theme.textFieldInputHint
 import com.example.myappstudyverse.ui.viewmodel.LectureViewModel
 import com.example.myappstudyverse.ui.viewmodel.LectureViewModelFactory
+import kotlinx.coroutines.launch
 
 @Composable
 fun LectureDetailScreen(
@@ -96,6 +103,9 @@ fun LectureDetailScreen(
 
     var isStartTimeMenuExpanded by remember { mutableStateOf(false) }
     var isEndTimeMenuExpanded by remember { mutableStateOf(false) }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     val timeOptions = listOf(
         "08 AM",
@@ -156,6 +166,38 @@ fun LectureDetailScreen(
         }
     }
     Scaffold(
+        snackbarHost = {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                SnackbarHost(
+                    hostState = snackbarHostState
+                ) { snackbarData ->
+                    Box(
+                        modifier = Modifier
+                            .width(120.dp)
+                            .height(48.dp)
+                            .offset(y = 80.dp)
+                            .border(
+                                width = 0.5.dp,
+                                color = OffWhite1.copy(alpha = 0.4f),
+                                shape = RoundedCornerShape(14.dp)
+                            )
+                            .background(
+                                color = NavigationSurface,
+                                shape = RoundedCornerShape(14.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = snackbarData.visuals.message,
+                            color = OffWhite2
+                        )
+                    }
+                }
+            }
+        },
         bottomBar = {
             Box(
                 modifier = Modifier
@@ -203,11 +245,11 @@ fun LectureDetailScreen(
                             Icon(
                                 imageVector = Icons.Outlined.Delete,
                                 contentDescription = "Delete",
-                                tint = Color.White
+                                tint = OffWhite2
                             )
                             Text(
                                 text = "Delete",
-                                color = Color.White
+                                color = OffWhite2
                             )
                         }
                         Box(
@@ -225,7 +267,9 @@ fun LectureDetailScreen(
                                     lectureTitle.isNotBlank() &&
                                             lectureStartTime.isNotBlank() &&
                                             lectureEndTime.isNotBlank()
+
                                 if (hasRequiredInput) {
+
                                     val lecture = Lecture(
                                         id = lectureId ?: 0,
                                         title = lectureTitle,
@@ -239,22 +283,25 @@ fun LectureDetailScreen(
                                     )
                                     if (lectureId == null) {
                                         lectureViewModel.addLecture(lecture)
+                                        navController.popBackStack()
                                     } else {
                                         lectureViewModel.updateLecture(lecture)
-                                    }
 
-                                    navController.popBackStack()
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar("Saved")
+                                        }
+                                    }
                                 }
                             }
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.Check,
                                 contentDescription = "Save",
-                                tint = Color.White
+                                tint = OffWhite2
                             )
                             Text(
                                 text = "Save",
-                                color = Color.White
+                                color = OffWhite2
                             )
                         }
                     }
@@ -320,13 +367,13 @@ fun LectureDetailScreen(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(InputFieldBackground),
+                        .background(Green.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.CoPresent,
                         contentDescription = null,
-                        tint = PurpleSecondary,
+                        tint = Green.copy(alpha = 0.8f),
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -339,7 +386,7 @@ fun LectureDetailScreen(
                         "LECTURE",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = PurpleSecondary
+                    color = Green.copy(alpha = 0.8f)
                 )
             }
             Spacer(modifier = Modifier.height(18.dp))
@@ -348,7 +395,7 @@ fun LectureDetailScreen(
                 text = "Lecture Title *",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextSecondary
+                color = OffWhite2
             )
             Spacer(modifier = Modifier.height(6.dp))
 
@@ -357,7 +404,7 @@ fun LectureDetailScreen(
                 onValueChange = { newLectureTitle ->
                     lectureTitle = newLectureTitle
                 },
-                placeholder = "Enter Lecture Title"
+                placeholder = "Enter Title"
             )
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -417,7 +464,7 @@ fun LectureDetailScreen(
                 text = "Room",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextSecondary
+                color = OffWhite2
             )
             Spacer(modifier = Modifier.height(6.dp))
 
@@ -443,7 +490,7 @@ fun LectureDetailScreen(
                         text = "Start Time *",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextSecondary
+                        color = OffWhite2
                     )
                     Spacer(modifier = Modifier.height(6.dp))
 
@@ -452,9 +499,13 @@ fun LectureDetailScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(56.dp)
+                                .background(
+                                    color = NavigationSurface,
+                                    shape = RoundedCornerShape(18.dp)
+                                )
                                 .border(
                                     width = 1.dp,
-                                    color = InputFieldBorder,
+                                    color = Gridline,
                                     shape = RoundedCornerShape(18.dp)
                                 )
                                 .clip(RoundedCornerShape(18.dp))
@@ -466,10 +517,20 @@ fun LectureDetailScreen(
                                     vertical = 16.dp
                                 )
                         ) {
-                            Text(
-                                text = lectureStartTime,
-                                fontSize = 16.sp
-                            )
+                            if (lectureStartTime.isEmpty()) {
+                                Text(
+                                    text = "09:00 AM",
+                                    fontSize = 16.sp,
+                                    color = textFieldInputHint
+                                )
+                            } else {
+                                Text(
+                                    text = lectureStartTime,
+                                    fontSize = 16.sp,
+                                    color = OffWhite1
+                                )
+                            }
+
                         }
                         DropdownMenu(
                             expanded = isStartTimeMenuExpanded,
@@ -480,7 +541,8 @@ fun LectureDetailScreen(
                                 x = 33.dp,
                                 y = (-15).dp
                             ),
-                            containerColor = SpaceSurface
+                            containerColor = SpaceSurface,
+                            border = BorderStroke(width = 1.dp, color = Gridline)
                         ) {
                             Column(
                                 modifier = Modifier
@@ -532,7 +594,7 @@ fun LectureDetailScreen(
                         text = "End Time *",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextSecondary
+                        color = OffWhite2
                     )
                     Spacer(modifier = Modifier.height(6.dp))
 
@@ -541,9 +603,13 @@ fun LectureDetailScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(56.dp)
+                                .background(
+                                    color = NavigationSurface,
+                                    shape = RoundedCornerShape(18.dp)
+                                )
                                 .border(
                                     width = 1.dp,
-                                    color = InputFieldBorder,
+                                    color = Gridline,
                                     shape = RoundedCornerShape(18.dp)
                                 )
                                 .clip(RoundedCornerShape(18.dp))
@@ -555,10 +621,19 @@ fun LectureDetailScreen(
                                     vertical = 16.dp
                                 )
                         ) {
-                            Text(
-                                text = lectureEndTime,
-                                fontSize = 16.sp
-                            )
+                            if (lectureEndTime.isEmpty()) {
+                                Text(
+                                    text = "10:00 AM",
+                                    fontSize = 16.sp,
+                                    color = textFieldInputHint
+                                )
+                            } else {
+                                Text(
+                                    text = lectureEndTime,
+                                    fontSize = 16.sp,
+                                    color = OffWhite1
+                                )
+                            }
                         }
 
                         DropdownMenu(
@@ -570,7 +645,8 @@ fun LectureDetailScreen(
                                 x = 33.dp,
                                 y = (-15).dp
                             ),
-                            containerColor = SpaceSurface
+                            containerColor = SpaceSurface,
+                            border = BorderStroke(width = 1.dp, color = Gridline),
                         ) {
                             Column(
                                 modifier = Modifier
@@ -600,7 +676,7 @@ fun LectureDetailScreen(
                 text = "Lecturer",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextSecondary
+                color = OffWhite2
             )
             Spacer(modifier = Modifier.height(6.dp))
 
@@ -628,9 +704,13 @@ private fun BasicLectureTextField(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
+            .background(
+                color = NavigationSurface,
+                shape = RoundedCornerShape(18.dp)
+            )
             .border(
-                width = 1.dp,
-                color = InputFieldBorder,
+                width = 0.5.dp,
+                color = Gridline,
                 shape = RoundedCornerShape(18.dp)
             )
             .padding(
@@ -639,7 +719,7 @@ private fun BasicLectureTextField(
             ),
         textStyle = LocalTextStyle.current.copy(
             fontSize = 16.sp,
-            color = TextPrimary
+            color = OffWhite1
         ),
         singleLine = true,
         decorationBox = { innerTextField ->
@@ -648,7 +728,7 @@ private fun BasicLectureTextField(
                     Text(
                         text = placeholder,
                         fontSize = 16.sp,
-                        color = TextSecondary
+                        color = textFieldInputHint
                     )
                 }
 
